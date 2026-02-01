@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { Carousel } from '@/components/Carousel';
 import { VideoSection } from '@/components/VideoSection';
 import { Navbar } from '@/components/Navbar';
