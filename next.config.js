@@ -6,10 +6,6 @@ const nextConfig = {
       { protocol: 'http', hostname: '**' },
     ],
   },
-  turbopack: {
-    // force Turbopack to use this project directory as the root
-    root: './',
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
