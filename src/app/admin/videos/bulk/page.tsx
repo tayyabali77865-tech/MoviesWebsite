@@ -206,7 +206,7 @@ export default function BulkAnimeImport() {
                                             placeholder="m3u8 URL to apply to all"
                                             className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
                                         />
-                                        <p className="text-[10px] text-gray-500 mt-1">If blank, you'll need to add URLs manually later.</p>
+                                        <p className="text-[10px] text-gray-500 mt-1">If blank, you&apos;ll need to add URLs manually later.</p>
                                     </div>
 
                                     <div className="space-y-4">
