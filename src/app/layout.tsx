@@ -15,11 +15,10 @@ export const metadata: Metadata = {
     title: 'Complet Stream — Watch Movies & TV Shows Online',
     description: 'Your ultimate streaming destination for movies and TV shows with premium features',
     type: 'website',
-    url: 'https://completstream.vercel.app',
+      url: 'https://movieswebsite.vercel.app',
   },
   robots: 'index, follow',
   viewport: 'width=device-width, initial-scale=1.0',
-  charset: 'utf-8',
 };
 
 export default function RootLayout({
