@@ -13,7 +13,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const nav = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/videos', label: 'Videos', icon: Video },
-    { href: '/admin/videos/bulk-movie', label: 'Bulk Import', icon: Video },
+    { href: '/admin/videos/bulk-movie', label: 'Bulk Movie', icon: Video },
+    { href: '/admin/videos/bulk-bollywood', label: 'Bulk Bollywood', icon: Video },
+    { href: '/admin/videos/bulk-netflix', label: 'Bulk Netflix', icon: Video },
     { href: '/admin/carousel', label: 'Carousel', icon: Image },
   ];
 

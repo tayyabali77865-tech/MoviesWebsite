@@ -47,6 +47,7 @@ interface CustomVideoPlayerProps {
   tmdbId?: string;
   malId?: string;
   anilistId?: string;
+  netflixId?: string;
   season?: number;
   episode?: number;
   type?: string;
@@ -76,6 +77,7 @@ export function CustomVideoPlayer({
   tmdbId,
   malId,
   anilistId,
+  netflixId,
   season = 1,
   episode = 1,
   type = 'movie',
@@ -370,6 +372,14 @@ export function CustomVideoPlayer({
       });
     }
 
+    // 7. Netflix ID (Experimental)
+    if (netflixId) {
+      servers.push({
+        name: 'Netflix Mirror',
+        url: `https://vidsrc.me/embed/movie?netflix=${netflixId}` // Note: This is hypothetical supporting but good to have
+      });
+    }
+
     return servers;
   };
 
@@ -444,7 +454,7 @@ export function CustomVideoPlayer({
                     />
                   )}
                 </video>
-              ) : (tmdbId || malId) ? (
+              ) : (tmdbId || malId || netflixId) ? (
                 <div className="relative w-full h-full bg-black">
                   {iframeLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-[40]">

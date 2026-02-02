@@ -25,6 +25,7 @@ interface Video {
   tmdbId: string | null;
   malId: string | null;
   anilistId: string | null;
+  netflixId: string | null;
   type: string;
 }
 
@@ -54,13 +55,22 @@ function WatchContent() {
         else {
           setVideo(data);
           // If it's a TV show, series, drama, or anime, fetch details for episode selection
-          if ((data.type === 'tv' || data.type === 'series' || data.type === 'drama' || data.type === 'anime') && data.tmdbId) {
-            setLoadingEpisodes(true);
-            fetch(`/api/tmdb/tv/${data.tmdbId}`)
-              .then(res => res.json())
-              .then(tvData => setTvDetails(tvData))
-              .catch(err => console.error('Failed to fetch episodes', err))
-              .finally(() => setLoadingEpisodes(false));
+          if (data.type === 'tv' || data.type === 'series' || data.type === 'drama' || data.type === 'anime') {
+            if (data.tmdbId) {
+              setLoadingEpisodes(true);
+              fetch(`/api/tmdb/tv/${data.tmdbId}`)
+                .then(res => res.json())
+                .then(tvData => setTvDetails(tvData))
+                .catch(err => console.error('Failed to fetch TMDB episodes', err))
+                .finally(() => setLoadingEpisodes(false));
+            } else if (data.netflixId) {
+              setLoadingEpisodes(true);
+              fetch(`/api/netflix/episodes/${data.netflixId}`)
+                .then(res => res.json())
+                .then(tvData => setTvDetails(tvData))
+                .catch(err => console.error('Failed to fetch Netflix episodes', err))
+                .finally(() => setLoadingEpisodes(false));
+            }
           }
         }
       })

@@ -63,6 +63,7 @@ export async function POST(req: Request) {
                         tmdbId: tmdbId,
                         malId: v.malId || null,
                         anilistId: v.anilistId || null,
+                        netflixId: v.netflixId || null,
                         type: v.type || 'movie',
                         section: v.section || 'new',
                         category: 'deprecated',
