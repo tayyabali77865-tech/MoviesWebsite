@@ -24,8 +24,8 @@ export async function POST(req: Request) {
             try {
                 let tmdbId = v.tmdbId || null;
 
-                // Auto-fetch TMDB ID for anime if not provided
-                if (!tmdbId && v.type === 'anime' && v.title) {
+                // Auto-fetch TMDB ID for anime or Netflix if not provided
+                if (!tmdbId && v.title && (v.type === 'anime' || v.netflixId)) {
                     try {
                         const searchTMDB = async (q: string, type: 'tv' | 'movie') => {
                             const url = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(q)}`;
@@ -33,21 +33,25 @@ export async function POST(req: Request) {
                             return await res.json();
                         };
 
-                        // Try 1: Direct title as TV
-                        let data = await searchTMDB(v.title, 'tv');
+                        const lookupType = (v.type === 'movie' || !v.netflixId) ? 'movie' : 'tv';
+
+                        // Try 1: Direct title
+                        let data = await searchTMDB(v.title, lookupType === 'movie' ? 'movie' : 'tv');
                         if (data.results?.length > 0) {
                             tmdbId = data.results[0].id.toString();
-                        } else {
-                            // Try 2: Direct title as Movie
+                        } else if (lookupType === 'tv') {
+                            // Try 2: As movie if TV failed
                             data = await searchTMDB(v.title, 'movie');
                             if (data.results?.length > 0) {
                                 tmdbId = data.results[0].id.toString();
-                            } else {
-                                // Try 3: Title + " Anime" as TV
-                                data = await searchTMDB(`${v.title} Anime`, 'tv');
-                                if (data.results?.length > 0) {
-                                    tmdbId = data.results[0].id.toString();
-                                }
+                            }
+                        }
+
+                        // Special case for anime suffix if still not found
+                        if (!tmdbId && v.type === 'anime') {
+                            data = await searchTMDB(`${v.title} Anime`, 'tv');
+                            if (data.results?.length > 0) {
+                                tmdbId = data.results[0].id.toString();
                             }
                         }
                     } catch (e) {

@@ -378,24 +378,17 @@ export function CustomVideoPlayer({
     // 7. Dedicated Netflix Mirrors
     if (netflixId) {
       servers.push({
-        name: 'Netflix Mirror 1 (Multi-lang)',
+        name: 'Mirror 6 (Netflix 1)',
         url: isTv
           ? `https://vidsrc.me/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
           : `https://vidsrc.me/embed/movie?netflix=${netflixId}`
       });
 
       servers.push({
-        name: 'Netflix Mirror 2 (Fast)',
+        name: 'Mirror 7 (Netflix 2)',
         url: isTv
           ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
           : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`
-      });
-
-      servers.push({
-        name: 'Netflix Mirror 3 (Global)',
-        url: isTv
-          ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
-          : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`
       });
     }
 
