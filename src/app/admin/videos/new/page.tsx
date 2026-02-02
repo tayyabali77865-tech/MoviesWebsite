@@ -7,7 +7,7 @@ import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { UploadField } from '@/components/UploadField';
 
-const TYPES = ['movie', 'anime', 'manga', 'trailer'];
+const TYPES = ['movie', 'series', 'drama', 'anime', 'manga', 'trailer'];
 const SECTIONS = ['new', 'trending', 'upcoming', 'random'];
 
 export default function NewVideoPage() {

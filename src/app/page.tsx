@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { Tv, Clapperboard as Series } from 'lucide-react';
 
 const PAGE_SIZE = 50;
-const SIDEBAR_CATS = ['movies', 'animation', 'manga', 'trailer'] as const;
+const SIDEBAR_CATS = ['movie', 'series', 'drama', 'anime', 'manga', 'trailer'] as const;
 
 export default async function HomePage({
   searchParams,

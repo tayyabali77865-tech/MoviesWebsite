@@ -53,8 +53,8 @@ function WatchContent() {
         if (data.error) router.replace('/');
         else {
           setVideo(data);
-          // If it's a TV show or anime, fetch details for episode selection
-          if ((data.type === 'tv' || data.type === 'anime') && data.tmdbId) {
+          // If it's a TV show, series, drama, or anime, fetch details for episode selection
+          if ((data.type === 'tv' || data.type === 'series' || data.type === 'drama' || data.type === 'anime') && data.tmdbId) {
             setLoadingEpisodes(true);
             fetch(`/api/tmdb/tv/${data.tmdbId}`)
               .then(res => res.json())
@@ -114,7 +114,7 @@ function WatchContent() {
       />
 
       {/* Episode Selection UI */}
-      {!minimized && (video.type === 'tv' || video.type === 'anime') && video.tmdbId && (
+      {!minimized && (video.type === 'tv' || video.type === 'series' || video.type === 'drama' || video.type === 'anime') && video.tmdbId && (
         <div className="relative z-10 p-6 max-w-7xl mx-auto mt-20">
           <div className="flex items-center gap-3 mb-6">
             <Clapperboard className="w-8 h-8 text-red-500" />

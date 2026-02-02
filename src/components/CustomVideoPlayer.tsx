@@ -555,7 +555,7 @@ export function CustomVideoPlayer({
                     {/* Progress Bar - Only for direct sources */}
                     {currentSrc && (
                       <div
-                        className="h-1.5 bg-white/20 rounded-full cursor-pointer group relative"
+                        className="h-2 bg-white/20 rounded-full cursor-pointer group relative"
                         onClick={seek}
                       >
                         <div
@@ -563,7 +563,7 @@ export function CustomVideoPlayer({
                           style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
                         />
                         <div
-                          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full scale-0 group-hover:scale-100 transition-transform shadow-lg"
+                          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full scale-100 transition-transform shadow-lg"
                           style={{ left: duration ? `${(currentTime / duration) * 100}%` : '0%', marginLeft: '-8px' }}
                         />
                       </div>

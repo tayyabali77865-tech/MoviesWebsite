@@ -11,6 +11,7 @@ interface Video {
   title: string;
   thumbnailUrl: string;
   category: string;
+  type: string;
   createdAt: Date;
 }
 
@@ -49,7 +50,7 @@ export function VideoList({ videos }: { videos: Video[] }) {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-medium text-white truncate">{v.title}</h3>
-            <p className="text-sm text-gray-400 capitalize">{v.category}</p>
+            <p className="text-sm text-gray-400 capitalize">{v.type}</p>
           </div>
           <div className="flex items-center gap-2">
             <Link

@@ -7,7 +7,7 @@ export default async function AdminDashboardPage() {
     prisma.video.count(),
     prisma.carouselSlide.count(),
     prisma.video.groupBy({
-      by: ['category'],
+      by: ['type'],
       _count: { id: true },
     }),
   ]);
@@ -48,8 +48,8 @@ export default async function AdminDashboardPage() {
         <h2 className="text-xl font-semibold text-white mb-4">Videos by category</h2>
         <ul className="space-y-2">
           {byCategory.map((c) => (
-            <li key={c.category} className="flex justify-between text-gray-300">
-              <span className="capitalize">{c.category}</span>
+            <li key={c.type} className="flex justify-between text-gray-300">
+              <span className="capitalize">{c.type}</span>
               <span className="font-medium text-white">{c._count.id}</span>
             </li>
           ))}
