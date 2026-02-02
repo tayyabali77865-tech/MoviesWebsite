@@ -454,7 +454,7 @@ export function CustomVideoPlayer({
                     />
                   )}
                 </video>
-              ) : (tmdbId || malId || netflixId) ? (
+              ) : (tmdbId || malId || netflixId || anilistId) ? (
                 <div className="relative w-full h-full bg-black">
                   {iframeLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-[40]">
@@ -506,7 +506,7 @@ export function CustomVideoPlayer({
             )}
 
             {/* Mirror Switcher for Embeds (Only show if no direct source) */}
-            {!currentSrc && (tmdbId || malId) && (
+            {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
               <div className={clsx(
                 "absolute top-20 left-4 flex flex-wrap gap-2 z-[60] transition-opacity duration-300",
                 showControls ? "opacity-100" : "opacity-0 pointer-events-none"

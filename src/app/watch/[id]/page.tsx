@@ -70,6 +70,13 @@ function WatchContent() {
                 .then(tvData => setTvDetails(tvData))
                 .catch(err => console.error('Failed to fetch Netflix episodes', err))
                 .finally(() => setLoadingEpisodes(false));
+            } else if (data.malId) {
+              setLoadingEpisodes(true);
+              fetch(`/api/anime/episodes/${data.malId}`)
+                .then(res => res.json())
+                .then(tvData => setTvDetails(tvData))
+                .catch(err => console.error('Failed to fetch Anime episodes', err))
+                .finally(() => setLoadingEpisodes(false));
             }
           }
         }
@@ -118,13 +125,14 @@ function WatchContent() {
         tmdbId={video.tmdbId || undefined}
         malId={video.malId || undefined}
         anilistId={video.anilistId || undefined}
+        netflixId={video.netflixId || undefined}
         season={season}
         episode={episode}
         type={video.type}
       />
 
-      {/* Episode Selection UI - Always visible for series/drama/anime */}
-      {(video.type === 'tv' || video.type === 'series' || video.type === 'drama' || video.type === 'anime') && video.tmdbId && (
+      {/* Episode Selection UI - Always visible for series/drama/anime if an ID is present */}
+      {(video.type === 'tv' || video.type === 'series' || video.type === 'drama' || video.type === 'anime') && (video.tmdbId || video.netflixId || video.malId || video.anilistId) && (
         <div className={clsx(
           "fixed bottom-0 left-0 right-0 z-[60] bg-gradient-to-t from-black via-black/95 to-transparent backdrop-blur-xl border-t border-white/10",
           minimized ? "pb-24" : "pb-6"
