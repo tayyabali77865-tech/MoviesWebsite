@@ -12,7 +12,7 @@ const SECTIONS = ['new', 'trending', 'upcoming', 'random'];
 
 export default function NewVideoPage() {
   const router = useRouter();
-  const [searchSource, setSearchSource] = useState<'tmdb' | 'rapidapi'>('tmdb');
+  const [searchSource, setSearchSource] = useState<'tmdb' | 'rapidapi' | 'bollywood'>('tmdb');
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +51,17 @@ export default function NewVideoPage() {
           setSearchResults(data.results.map((m: any) => ({
             ...m,
             source: 'tmdb',
+            uniqueId: m.id
+          })));
+        }
+      } else if (searchSource === 'bollywood') {
+        const res = await fetch(`/api/admin/bollywood/search?query=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Bollywood Search Failed');
+        if (data.results) {
+          setSearchResults(data.results.map((m: any) => ({
+            ...m,
+            source: 'tmdb', // Use tmdb logic for results
             uniqueId: m.id
           })));
         }
@@ -210,6 +221,18 @@ export default function NewVideoPage() {
                 }`}
             >
               TMDB
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchSource('bollywood');
+                setSearchResults([]);
+                setSearchQuery('');
+              }}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${searchSource === 'bollywood' ? 'bg-surface-800 text-white shadow-sm' : 'text-gray-400 hover:text-white'
+                }`}
+            >
+              Bollywood
             </button>
             <button
               type="button"
