@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { SessionProvider } from '@/components/SessionProvider';
@@ -15,10 +15,13 @@ export const metadata: Metadata = {
     title: 'Complet Stream — Watch Movies & TV Shows Online',
     description: 'Your ultimate streaming destination for movies and TV shows with premium features',
     type: 'website',
-      url: 'https://movieswebsite.vercel.app',
   },
   robots: 'index, follow',
-  viewport: 'width=device-width, initial-scale=1.0',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
