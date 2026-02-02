@@ -37,9 +37,40 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             season_id: s.seasonId
         }));
 
+        // Fetch additional details for audio/subtitles if available
+        // Note: The netflix54 API often includes audio/subtitle info in title details
+        const detailsUrl = `${NETFLIX_BASE_URL}/title/details/?ids=${id}&lang=en`;
+        const detailsRes = await fetch(detailsUrl, {
+            headers: {
+                'x-rapidapi-host': 'netflix54.p.rapidapi.com',
+                'x-rapidapi-key': RAPIDAPI_KEY
+            }
+        });
+
+        let audioTracks = [];
+        let subtitles = [];
+
+        if (detailsRes.ok) {
+            const detailsData = await detailsRes.json();
+            const detail = detailsData[0];
+            if (detail?.details) {
+                // Some versions of netflix54 return audio/subtitle list in details
+                audioTracks = detail.details.audio?.map((a: any) => ({
+                    language: a.language || a.name,
+                    url: '#' // Indicating it's internal to the player/mirror
+                })) || [];
+                subtitles = detail.details.subtitles?.map((s: any) => ({
+                    language: s.language || s.name,
+                    url: '#'
+                })) || [];
+            }
+        }
+
         return NextResponse.json({
             id: id,
             seasons: seasons,
+            audioTracks: audioTracks,
+            subtitles: subtitles,
             source: 'netflix'
         });
     } catch (error) {

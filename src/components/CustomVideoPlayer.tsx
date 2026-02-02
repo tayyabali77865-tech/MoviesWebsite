@@ -292,41 +292,45 @@ export function CustomVideoPlayer({
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
     // 1. VidSrc XYZ (Reliable with Hindi Param)
-    if (tmdbId || malId) {
-      let baseUrl = '';
-      if (tmdbId) {
-        baseUrl = isTv
-          ? `https://vidsrc.xyz/embed/tv/${tmdbId}/${season}/${episode}`
-          : `https://vidsrc.xyz/embed/movie/${tmdbId}`;
-      } else if (malId) {
-        baseUrl = `https://vidsrc.xyz/embed/anime/${malId}/${episode}`;
-      }
+    let baseUrl = '';
+    if (tmdbId) {
+      baseUrl = isTv
+        ? `https://vidsrc.xyz/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.xyz/embed/movie/${tmdbId}`;
+    } else if (netflixId) {
+      baseUrl = isTv
+        ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+        : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`;
+    } else if (malId) {
+      baseUrl = `https://vidsrc.xyz/embed/anime/${malId}/${episode}`;
+    }
 
-      if (baseUrl) {
-        servers.push({
-          name: 'Primary Hindi Server',
-          url: `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}ds_lang=hi`
-        });
-      }
+    if (baseUrl) {
+      servers.push({
+        name: 'Primary Hindi Server',
+        url: `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}ds_lang=hi`
+      });
     }
 
     // 2. VidSrc CC (Excellent Hindi/Multi-lang fallback)
-    if (tmdbId || malId) {
-      let url = '';
-      if (tmdbId) {
-        url = isTv
-          ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${season}/${episode}`
-          : `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
-      } else if (malId) {
-        url = `https://vidsrc.cc/v2/embed/anime/${malId}/${episode}`;
-      }
+    let url = '';
+    if (tmdbId) {
+      url = isTv
+        ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
+    } else if (netflixId) {
+      url = isTv
+        ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+        : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`;
+    } else if (malId) {
+      url = `https://vidsrc.cc/v2/embed/anime/${malId}/${episode}`;
+    }
 
-      if (url) {
-        servers.push({
-          name: 'Server 2 (Hindi Dub)',
-          url: url
-        });
-      }
+    if (url) {
+      servers.push({
+        name: 'Server 2 (Hindi Dub)',
+        url: url
+      });
     }
 
     // 3. Embed.su (Very high speed, includes Hindi)
@@ -354,7 +358,6 @@ export function CustomVideoPlayer({
     // 5. Anime Specific (Vidsrc.icu)
     if (malId || anilistId) {
       const id = anilistId || malId;
-      const type = anilistId ? 'anime' : 'anime'; // Both work
       servers.push({
         name: 'Anime Server (Dual Audio)',
         url: `https://vidsrc.icu/embed/anime/${id}/${episode}/1`
@@ -372,11 +375,27 @@ export function CustomVideoPlayer({
       });
     }
 
-    // 7. Netflix ID (Experimental)
+    // 7. Dedicated Netflix Mirrors
     if (netflixId) {
       servers.push({
-        name: 'Netflix Mirror',
-        url: `https://vidsrc.me/embed/movie?netflix=${netflixId}` // Note: This is hypothetical supporting but good to have
+        name: 'Netflix Mirror 1 (Multi-lang)',
+        url: isTv
+          ? `https://vidsrc.me/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+          : `https://vidsrc.me/embed/movie?netflix=${netflixId}`
+      });
+
+      servers.push({
+        name: 'Netflix Mirror 2 (Fast)',
+        url: isTv
+          ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+          : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`
+      });
+
+      servers.push({
+        name: 'Netflix Mirror 3 (Global)',
+        url: isTv
+          ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+          : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`
       });
     }
 

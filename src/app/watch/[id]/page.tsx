@@ -67,7 +67,20 @@ function WatchContent() {
               setLoadingEpisodes(true);
               fetch(`/api/netflix/episodes/${data.netflixId}`)
                 .then(res => res.json())
-                .then(tvData => setTvDetails(tvData))
+                .then(tvData => {
+                  setTvDetails(tvData);
+                  // Merge Netflix language tracks if they exist
+                  if (tvData.audioTracks || tvData.subtitles) {
+                    setVideo(prev => {
+                      if (!prev) return prev;
+                      return {
+                        ...prev,
+                        audioTracks: [...(prev.audioTracks || []), ...(tvData.audioTracks || [])],
+                        subtitles: [...(prev.subtitles || []), ...(tvData.subtitles || [])],
+                      };
+                    });
+                  }
+                })
                 .catch(err => console.error('Failed to fetch Netflix episodes', err))
                 .finally(() => setLoadingEpisodes(false));
             } else if (data.malId) {
