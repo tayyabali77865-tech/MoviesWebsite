@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
-const RAPIDAPI_HOST = 'animeapi.p.rapidapi.com';
-
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
 
@@ -20,32 +17,27 @@ export async function GET(req: Request) {
     }
 
     try {
-        console.log('Fetching anime from RapidAPI:', query);
-        const url = `https://animeapi.p.rapidapi.com/all?search=${encodeURIComponent(query)}`;
-        const res = await fetch(url, {
-            headers: {
-                'X-RapidAPI-Key': RAPIDAPI_KEY || '',
-                'X-RapidAPI-Host': RAPIDAPI_HOST,
-            },
-        });
+        console.log('Fetching anime from Jikan (MAL) API:', query);
+        const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=20`;
+        const res = await fetch(url);
 
         if (!res.ok) {
             const errText = await res.text();
-            throw new Error(`RapidAPI error (${res.status}): ${errText.slice(0, 100)}`);
+            throw new Error(`Jikan API error (${res.status}): ${errText.slice(0, 100)}`);
         }
 
         const data = await res.json();
-
-        // RapidAPI Anime API usually returns an array directly or inside a results/data property
-        const rawResults = Array.isArray(data) ? data : (data.results || data.data || []);
+        const rawResults = data.data || [];
 
         const results = rawResults.map((item: any) => ({
-            id: (item.id || item.mal_id || Math.random().toString(36).substr(2, 9)).toString(),
-            malId: (item.mal_id || item.id || '').toString(),
-            name: item.title || item.name || 'Unknown Title',
-            image: item.thumbnail || item.image || item.image_url || '/placeholder.png',
-            description: item.body || item.description || item.synopsis || '',
-            type: 'anime'
+            id: item.mal_id.toString(),
+            malId: item.mal_id.toString(),
+            name: item.title_english || item.title || 'Unknown Title',
+            image: item.images?.webp?.large_image_url || item.images?.jpg?.large_image_url || '/placeholder.png',
+            description: item.synopsis || '',
+            type: 'anime',
+            score: item.score,
+            year: item.year || item.aired?.from?.split('-')[0]
         }));
 
         return NextResponse.json(results);
