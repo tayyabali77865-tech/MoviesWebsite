@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && NEXT_DISABLE_ESLINT=true next build",
+    "build": "prisma generate && prisma db push --accept-data-loss && NEXT_DISABLE_ESLINT=true next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
@@ -38,8 +38,7 @@
     "tailwindcss": "^3.4.14",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
-  }
-  ,
+  },
   "overrides": {
     "rimraf": "^4.0.0",
     "glob": "^10.4.5"
