@@ -113,65 +113,73 @@ function WatchContent() {
         type={video.type}
       />
 
-      {/* Episode Selection UI */}
-      {!minimized && (video.type === 'tv' || video.type === 'series' || video.type === 'drama' || video.type === 'anime') && video.tmdbId && (
-        <div className="relative z-10 p-6 max-w-7xl mx-auto mt-20">
-          <div className="flex items-center gap-3 mb-6">
-            <Clapperboard className="w-8 h-8 text-red-500" />
-            <h2 className="text-2xl font-bold text-white">Select Episode</h2>
-          </div>
-
-          {loadingEpisodes ? (
-            <div className="flex items-center gap-2 text-gray-400">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Loading episode lists...</span>
+      {/* Episode Selection UI - Always visible for series/drama/anime */}
+      {(video.type === 'tv' || video.type === 'series' || video.type === 'drama' || video.type === 'anime') && video.tmdbId && (
+        <div className={clsx(
+          "fixed bottom-0 left-0 right-0 z-[60] bg-gradient-to-t from-black via-black/95 to-transparent backdrop-blur-xl border-t border-white/10",
+          minimized ? "pb-24" : "pb-6"
+        )}>
+          <div className="max-w-7xl mx-auto px-6 pt-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Clapperboard className="w-6 h-6 text-red-500" />
+              <h2 className="text-lg font-bold text-white">Episodes</h2>
+              {loadingEpisodes && <Loader2 className="w-4 h-4 animate-spin text-red-500" />}
             </div>
-          ) : tvDetails ? (
-            <div className="space-y-8">
-              {/* Season Selection */}
-              <div className="flex flex-wrap gap-2">
-                {tvDetails.seasons?.filter((s: any) => s.season_number > 0).map((s: any) => (
-                  <button
-                    key={s.id}
-                    onClick={() => router.push(`/watch/${id}?s=${s.season_number}&e=1`)}
-                    className={clsx(
-                      "px-6 py-2 rounded-lg font-bold transition-all border",
-                      season === s.season_number
-                        ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20"
-                        : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white"
-                    )}
-                  >
-                    Season {s.season_number}
-                  </button>
-                ))}
-              </div>
 
-              {/* Episode Grid for Current Season */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-                {Array.from({ length: tvDetails.seasons?.find((s: any) => s.season_number === season)?.episode_count || 0 }).map((_, i) => {
-                  const epNum = i + 1;
-                  return (
+            {loadingEpisodes ? (
+              <div className="flex items-center gap-2 text-gray-400 py-4">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Loading episodes...</span>
+              </div>
+            ) : tvDetails ? (
+              <div className="space-y-4">
+                {/* Season Selection */}
+                <div className="flex flex-wrap gap-2">
+                  {tvDetails.seasons?.filter((s: any) => s.season_number > 0).map((s: any) => (
                     <button
-                      key={epNum}
-                      onClick={() => router.push(`/watch/${id}?s=${season}&e=${epNum}`)}
+                      key={s.id}
+                      onClick={() => router.push(`/watch/${id}?s=${s.season_number}&e=1`)}
                       className={clsx(
-                        "aspect-square rounded-xl border flex flex-col items-center justify-center gap-1 transition-all group",
-                        episode === epNum
-                          ? "bg-red-600 border-red-500 text-white shadow-xl scale-105"
-                          : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/30 hover:text-white"
+                        "px-4 py-1.5 rounded-lg font-bold transition-all border text-sm",
+                        season === s.season_number
+                          ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20"
+                          : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white"
                       )}
                     >
-                      <span className="text-[10px] uppercase tracking-tighter opacity-50 font-bold">Ep</span>
-                      <span className="text-xl font-black">{epNum}</span>
-                      {episode === epNum && <Play className="w-3 h-3 fill-white" />}
+                      S{s.season_number}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
+
+                {/* Episode Grid - Scrollable */}
+                <div className="overflow-x-auto pb-2">
+                  <div className="flex gap-2 min-w-max">
+                    {Array.from({ length: tvDetails.seasons?.find((s: any) => s.season_number === season)?.episode_count || 0 }).map((_, i) => {
+                      const epNum = i + 1;
+                      return (
+                        <button
+                          key={epNum}
+                          onClick={() => router.push(`/watch/${id}?s=${season}&e=${epNum}`)}
+                          className={clsx(
+                            "w-16 h-16 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all group flex-shrink-0",
+                            episode === epNum
+                              ? "bg-red-600 border-red-500 text-white shadow-xl scale-105 ring-2 ring-red-500/50"
+                              : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/30 hover:text-white"
+                          )}
+                        >
+                          <span className="text-[9px] uppercase tracking-tighter opacity-50 font-bold">Ep</span>
+                          <span className="text-lg font-black">{epNum}</span>
+                          {episode === epNum && <Play className="w-3 h-3 fill-white" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-gray-500 italic">No episode details found for this series.</p>
-          )}
+            ) : (
+              <p className="text-gray-500 italic text-sm py-2">No episodes found</p>
+            )}
+          </div>
         </div>
       )}
     </>

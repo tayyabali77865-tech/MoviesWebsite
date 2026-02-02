@@ -100,8 +100,19 @@ export function CustomVideoPlayer({
   const [settingsTab, setSettingsTab] = useState<'main' | 'quality' | 'speed' | 'audio' | 'subtitles'>('main');
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [currentServer, setCurrentServer] = useState(0);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   const currentSrc = hlsUrl || sources[resolution === 'auto' ? '720' : resolution] || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
+
+  // Reset iframe loading when server changes
+  useEffect(() => {
+    if (!currentSrc && (tmdbId || malId)) {
+      setIframeLoading(true);
+      // Set a timeout to hide loading after 5 seconds
+      const timer = setTimeout(() => setIframeLoading(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentServer, currentSrc, tmdbId, malId]);
 
   // Initialize HLS
   useEffect(() => {
@@ -433,13 +444,21 @@ export function CustomVideoPlayer({
                   )}
                 </video>
               ) : (tmdbId || malId) ? (
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-full bg-black">
+                  {iframeLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-[40]">
+                      <Loader2 className="w-12 h-12 animate-spin text-red-600 mb-4" />
+                      <p className="text-sm font-medium text-gray-400">Fetching {type} from secure server...</p>
+                      <p className="text-[10px] text-gray-500 mt-2">Server response might take 2-5 seconds</p>
+                    </div>
+                  )}
                   <iframe
                     src={embedUrl}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 relative z-[30]"
                     referrerPolicy="origin"
                     allowFullScreen
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    onLoad={() => setIframeLoading(false)}
                   />
                   {/* Note for Hindi/Multi-lang */}
                   {!currentSrc && (
