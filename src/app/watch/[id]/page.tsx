@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
 import { CustomVideoPlayer } from '@/components/CustomVideoPlayer';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Clapperboard, ChevronRight, Play } from 'lucide-react';
+import { clsx } from 'clsx';
 
 interface Video {
   id: string;
@@ -40,14 +41,28 @@ function WatchContent() {
   const [video, setVideo] = useState<Video | null>(null);
   const [minimized, setMinimized] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tvDetails, setTvDetails] = useState<any>(null);
+  const [loadingEpisodes, setLoadingEpisodes] = useState(false);
 
   useEffect(() => {
     if (!id) return;
+    setLoading(true);
     fetch(`/api/videos/${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) router.replace('/');
-        else setVideo(data);
+        else {
+          setVideo(data);
+          // If it's a TV show or anime, fetch details for episode selection
+          if ((data.type === 'tv' || data.type === 'anime') && data.tmdbId) {
+            setLoadingEpisodes(true);
+            fetch(`/api/tmdb/tv/${data.tmdbId}`)
+              .then(res => res.json())
+              .then(tvData => setTvDetails(tvData))
+              .catch(err => console.error('Failed to fetch episodes', err))
+              .finally(() => setLoadingEpisodes(false));
+          }
+        }
       })
       .catch(() => router.replace('/'))
       .finally(() => setLoading(false));
@@ -97,6 +112,68 @@ function WatchContent() {
         episode={episode}
         type={video.type}
       />
+
+      {/* Episode Selection UI */}
+      {!minimized && (video.type === 'tv' || video.type === 'anime') && video.tmdbId && (
+        <div className="relative z-10 p-6 max-w-7xl mx-auto mt-20">
+          <div className="flex items-center gap-3 mb-6">
+            <Clapperboard className="w-8 h-8 text-red-500" />
+            <h2 className="text-2xl font-bold text-white">Select Episode</h2>
+          </div>
+
+          {loadingEpisodes ? (
+            <div className="flex items-center gap-2 text-gray-400">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Loading episode lists...</span>
+            </div>
+          ) : tvDetails ? (
+            <div className="space-y-8">
+              {/* Season Selection */}
+              <div className="flex flex-wrap gap-2">
+                {tvDetails.seasons?.filter((s: any) => s.season_number > 0).map((s: any) => (
+                  <button
+                    key={s.id}
+                    onClick={() => router.push(`/watch/${id}?s=${s.season_number}&e=1`)}
+                    className={clsx(
+                      "px-6 py-2 rounded-lg font-bold transition-all border",
+                      season === s.season_number
+                        ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20"
+                        : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    Season {s.season_number}
+                  </button>
+                ))}
+              </div>
+
+              {/* Episode Grid for Current Season */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+                {Array.from({ length: tvDetails.seasons?.find((s: any) => s.season_number === season)?.episode_count || 0 }).map((_, i) => {
+                  const epNum = i + 1;
+                  return (
+                    <button
+                      key={epNum}
+                      onClick={() => router.push(`/watch/${id}?s=${season}&e=${epNum}`)}
+                      className={clsx(
+                        "aspect-square rounded-xl border flex flex-col items-center justify-center gap-1 transition-all group",
+                        episode === epNum
+                          ? "bg-red-600 border-red-500 text-white shadow-xl scale-105"
+                          : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/30 hover:text-white"
+                      )}
+                    >
+                      <span className="text-[10px] uppercase tracking-tighter opacity-50 font-bold">Ep</span>
+                      <span className="text-xl font-black">{epNum}</span>
+                      {episode === epNum && <Play className="w-3 h-3 fill-white" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 italic">No episode details found for this series.</p>
+          )}
+        </div>
+      )}
     </>
   );
 }

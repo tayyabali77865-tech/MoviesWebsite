@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
 import { Search, Plus, Loader2, Check, Film, Tv, Settings, Languages, Music } from 'lucide-react';
+import { clsx } from 'clsx';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
@@ -21,6 +22,8 @@ interface TMDBResult {
 export default function BulkMovieImport() {
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState<'movie' | 'tv' | 'multi'>('multi');
+    const [targetType, setTargetType] = useState<'movie' | 'series' | 'drama' | 'anime'>('movie');
+    const [targetSection, setTargetSection] = useState<'new' | 'trending' | 'upcoming' | 'random'>('new');
     const [searching, setSearching] = useState(false);
     const [results, setResults] = useState<TMDBResult[]>([]);
     const [selected, setSelected] = useState<TMDBResult[]>([]);
@@ -66,8 +69,8 @@ export default function BulkMovieImport() {
                 description: m.overview,
                 thumbnailUrl: m.poster_path ? `https://image.tmdb.org/t/p/w780${m.poster_path}` : '',
                 tmdbId: m.id.toString(),
-                type: m.media_type || (searchType === 'multi' ? 'movie' : searchType),
-                section: 'new',
+                type: targetType === 'movie' && (m.media_type === 'tv' || searchType === 'tv') ? 'series' : targetType,
+                section: targetSection,
                 hlsUrl: commonHlsUrl.trim() || undefined,
                 audioTracks: commonAudioTracks.filter(a => a.language && a.url),
             }));
@@ -218,10 +221,44 @@ export default function BulkMovieImport() {
 
                                 <div className="space-y-6">
                                     <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Import As Type</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { label: 'Movie', value: 'movie' },
+                                                { label: 'Web Series', value: 'series' },
+                                                { label: 'Drama', value: 'drama' },
+                                                { label: 'Anime', value: 'anime' }
+                                            ].map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => setTargetType(t.value as any)}
+                                                    className={clsx(
+                                                        "py-2 px-3 border rounded-lg text-xs font-medium transition-all capitalize",
+                                                        targetType === t.value
+                                                            ? "bg-red-600 border-red-500 text-white"
+                                                            : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Target Section</label>
                                         <div className="grid grid-cols-2 gap-2">
                                             {['new', 'trending', 'upcoming', 'random'].map(s => (
-                                                <button key={s} className="py-2 px-3 bg-white/5 border border-white/5 rounded-lg text-xs font-medium text-gray-400 hover:bg-white/10 hover:text-white capitalize transition-all">
+                                                <button
+                                                    key={s}
+                                                    onClick={() => setTargetSection(s as any)}
+                                                    className={clsx(
+                                                        "py-2 px-3 border rounded-lg text-xs font-medium transition-all capitalize",
+                                                        targetSection === s
+                                                            ? "bg-red-600 border-red-500 text-white"
+                                                            : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                                                    )}
+                                                >
                                                     {s}
                                                 </button>
                                             ))}

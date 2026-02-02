@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Film, Sparkles, Calendar, Shuffle, Newspaper, Clapperboard } from 'lucide-react';
+import { X, Film, Sparkles, Calendar, Shuffle, Newspaper, Clapperboard, Tv } from 'lucide-react';
 import { useUI } from '@/store/ui';
 import { clsx } from 'clsx';
 
@@ -11,6 +11,8 @@ const BLOG_URL = 'https://www.blogger.com';
 
 const items = [
   { href: '/?type=movie', label: 'Movies', icon: Film },
+  { href: '/?type=series', label: 'Series', icon: Clapperboard },
+  { href: '/?type=drama', label: 'Dramas', icon: Tv },
   { href: '/?type=anime', label: 'Anime', icon: Clapperboard },
   { href: '/?type=manga', label: 'Manga', icon: Film },
   { href: BLOG_URL, label: 'News', icon: Newspaper, external: true },

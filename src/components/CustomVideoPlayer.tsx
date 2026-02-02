@@ -11,6 +11,8 @@ import {
   Settings,
   X,
   ChevronDown,
+  RotateCcw,
+  RotateCw,
   Languages,
   Music,
   ExternalLink,
@@ -158,6 +160,15 @@ export function CustomVideoPlayer({
     setCurrentTime(newTime);
   }, []);
 
+  const skip = useCallback((seconds: number) => {
+    const v = videoRef.current;
+    if (!v) return;
+    const newTime = Math.max(0, Math.min(v.duration, v.currentTime + seconds));
+    v.currentTime = newTime;
+    if (audioRef.current) audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  }, []);
+
   const toggleFullscreen = useCallback(() => {
     const el = containerRef.current as any;
     if (!el) return;
@@ -264,7 +275,7 @@ export function CustomVideoPlayer({
   // Simplify to single unified Dual Audio API
   const getEmbedServers = () => {
     const servers = [];
-    const isTv = type === 'tv';
+    const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
     // 1. VidSrc XYZ (Reliable with Hindi Param)
     if (tmdbId || malId) {
@@ -564,10 +575,26 @@ export function CustomVideoPlayer({
                           <>
                             <button
                               type="button"
+                              onClick={() => skip(-10)}
+                              className="p-1 hover:text-red-500 transition-colors"
+                              title="Skip back 10s"
+                            >
+                              <RotateCcw className="w-5 h-5" />
+                            </button>
+                            <button
+                              type="button"
                               onClick={togglePlay}
                               className="p-1 hover:text-red-500 transition-colors"
                             >
                               {playing ? <Pause className="w-6 h-6 fill-currentColor" /> : <Play className="w-6 h-6 fill-currentColor" />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => skip(10)}
+                              className="p-1 hover:text-red-500 transition-colors"
+                              title="Skip forward 10s"
+                            >
+                              <RotateCw className="w-5 h-5" />
                             </button>
 
                             <div className="flex items-center gap-2 group/vol">

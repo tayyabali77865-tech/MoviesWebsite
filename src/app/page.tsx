@@ -4,6 +4,7 @@ import { VideoSection } from '@/components/VideoSection';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
 import { prisma } from '@/lib/prisma';
+import { Tv, Clapperboard as Series } from 'lucide-react';
 
 const PAGE_SIZE = 50;
 const SIDEBAR_CATS = ['movies', 'animation', 'manga', 'trailer'] as const;
@@ -37,7 +38,7 @@ export default async function HomePage({
     return videos.sort(() => Math.random() - 0.5);
   };
 
-  const [carousel, newVideos, trendingVideos, upcomingVideos, randomVideos, randomAnime] =
+  const [carousel, newVideos, trendingVideos, upcomingVideos, randomVideos, randomAnime, randomDramas, randomWebseries] =
     await Promise.all([
       prisma.carouselSlide.findMany({ orderBy: { order: 'asc' }, take: 10 }),
       fetchSection('new'),
@@ -47,6 +48,18 @@ export default async function HomePage({
       // Fetch some random anime for the global section
       prisma.video.findMany({
         where: { type: 'anime' },
+        include: { subtitles: true },
+        take: 10,
+      }).then(v => v.sort(() => Math.random() - 0.5)),
+      // Fetch random dramas
+      prisma.video.findMany({
+        where: { type: 'drama' },
+        include: { subtitles: true },
+        take: 10,
+      }).then(v => v.sort(() => Math.random() - 0.5)),
+      // Fetch random webseries
+      prisma.video.findMany({
+        where: { type: 'series' },
         include: { subtitles: true },
         take: 10,
       }).then(v => v.sort(() => Math.random() - 0.5)),
@@ -69,6 +82,14 @@ export default async function HomePage({
             {/* Show Random Anime section for all categories except when explicitly in Anime category (to avoid duplication if wanted, but user said "in all categories") */}
             {randomAnime.length > 0 && (
               <VideoSection title="Random Anime" section="random" type="anime" initialVideos={randomAnime} />
+            )}
+
+            {randomDramas.length > 0 && (
+              <VideoSection title="Featured Dramas" section="random" type="drama" initialVideos={randomDramas} />
+            )}
+
+            {randomWebseries.length > 0 && (
+              <VideoSection title="Web Series" section="random" type="series" initialVideos={randomWebseries} />
             )}
 
             {currentType !== 'movie' && currentType !== 'trailer' && (
