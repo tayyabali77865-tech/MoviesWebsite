@@ -16,6 +16,7 @@ import {
   Languages,
   Music,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
