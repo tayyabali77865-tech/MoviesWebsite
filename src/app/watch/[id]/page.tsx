@@ -60,6 +60,23 @@ function WatchContent() {
           setVideo({ id: 'error', title: 'Error: ' + data.error } as any);
         } else {
           setVideo(data);
+
+          // JIT Audio Enrichment: If no audio tracks, try to fetch them from Netflix API
+          if ((!data.audioTracks || data.audioTracks.length === 0) && data.netflixId) {
+            console.log('JIT: Fetching audio tracks for Netflix ID:', data.netflixId);
+            fetch(`/api/netflix/episodes/${data.netflixId}`)
+              .then(res => res.json())
+              .then(enrichData => {
+                if (enrichData.audioTracks?.length > 0) {
+                  setVideo(prev => prev ? {
+                    ...prev,
+                    audioTracks: enrichData.audioTracks
+                  } : prev);
+                }
+              })
+              .catch(err => console.error('JIT Enrichment Error:', err));
+          }
+
           // If it's a TV show, series, drama, or anime, fetch details for episode selection
           if (data.type === 'tv' || data.type === 'series' || data.type === 'drama' || data.type === 'anime') {
             if (data.tmdbId) {
