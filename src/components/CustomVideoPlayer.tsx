@@ -301,23 +301,7 @@ export function CustomVideoPlayer({
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // 1. VidSrc.in (Excellent Hindi/Multi-lang support - Top Priority)
-    if (tmdbId) {
-      const url = isTv
-        ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://vidsrc.in/embed/movie/${tmdbId}`;
-      servers.push({ name: 'Server 1 (Global/Hindi)', url });
-    }
-
-    // 2. VidSrc.to (Very Stable)
-    if (tmdbId) {
-      const url = isTv
-        ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://vidsrc.to/embed/movie/${tmdbId}`;
-      servers.push({ name: 'Server 2 (Stable Cloud)', url });
-    }
-
-    // 3. VidSrc XYZ (Native Hindi Support)
+    // 1. VidSrc XYZ (Native Hindi Support) - Highest priority for user's request
     let xyzUrl = '';
     if (tmdbId) {
       xyzUrl = isTv
@@ -333,13 +317,37 @@ export function CustomVideoPlayer({
 
     if (xyzUrl) {
       servers.push({
-        name: 'Server 3 (Hindi Dub)',
+        name: 'Server 1 (Hindi Dub)',
         url: `${xyzUrl}${xyzUrl.includes('?') ? '&' : '?'}ds_lang=hi`
       });
       servers.push({
-        name: 'Server 4 (Multi)',
+        name: 'Server 2 (Global HD)',
         url: xyzUrl
       });
+    }
+
+    // 2. VidSrc.to (Very Stable & Clean)
+    if (tmdbId) {
+      const url = isTv
+        ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.to/embed/movie/${tmdbId}`;
+      servers.push({ name: 'Server 3 (Cloud VIP)', url });
+    }
+
+    // 3. VidSrc.me (Excellent fallback)
+    if (tmdbId) {
+      const url = isTv
+        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${season}&e=${episode}`
+        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
+      servers.push({ name: 'Server 4 (Legacy)', url });
+    }
+
+    // 5. VidSrc.in (Hindi Fallback)
+    if (tmdbId) {
+      const url = isTv
+        ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.in/embed/movie/${tmdbId}`;
+      servers.push({ name: 'Server 5 (Global Mirror)', url });
     }
 
     // 4. VidSrc.pro (Usually cleaner)
@@ -475,8 +483,8 @@ export function CustomVideoPlayer({
                   />
                   {/* Note for Hindi/Multi-lang */}
                   {!currentSrc && (
-                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 backdrop-blur-md rounded-full border border-white/10 text-[10px] text-gray-400 z-50">
-                      💡 <b>Hindi User?</b> Check the player&apos;s internal &quot;Settings&quot; (⚙️) to select Hindi audio if available on this mirror.
+                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-600/90 backdrop-blur-md rounded-full border border-red-500/50 text-[10px] text-white font-bold z-50 shadow-xl animate-bounce-slow">
+                      💡 <b>Hindi User?</b> Check the player's internal "Settings" (⚙️) to select Hindi audio if available on this mirror.
                     </div>
                   )}
                 </div>
