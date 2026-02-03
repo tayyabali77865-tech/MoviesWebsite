@@ -292,7 +292,7 @@ export function CustomVideoPlayer({
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // 1. VidSrc.pm (Very fast, Good drama support)
+    // 1. VidSrc.pm (Very fast)
     let pmUrl = '';
     if (tmdbId) {
       pmUrl = isTv
@@ -304,7 +304,7 @@ export function CustomVideoPlayer({
         : `https://vidsrc.pm/embed/movie?netflix=${netflixId}`;
     }
     if (pmUrl) {
-      servers.push({ name: 'Primary Server (Fast)', url: pmUrl });
+      servers.push({ name: 'Primary (HD)', url: pmUrl });
     }
 
     // 2. VidSrc XYZ (Reliable with Hindi Param)
@@ -323,8 +323,12 @@ export function CustomVideoPlayer({
 
     if (xyzUrl) {
       servers.push({
-        name: 'Hindi Dub Mirror',
+        name: 'Server 2 (Hindi Dub)',
         url: `${xyzUrl}${xyzUrl.includes('?') ? '&' : '?'}ds_lang=hi`
+      });
+      servers.push({
+        name: 'Server 3 (Multi-Lat)',
+        url: xyzUrl
       });
     }
 
@@ -346,27 +350,29 @@ export function CustomVideoPlayer({
       servers.push({ name: 'Server 3 (Hindi)', url: ccUrl });
     }
 
-    // 4. Embed.su (Very high speed, includes Hindi)
+    // 4. SuperEmbed (Fast, Hindi integrated)
     if (tmdbId) {
-      const url = isTv
-        ? `https://embed.su/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://embed.su/embed/movie/${tmdbId}`;
-      servers.push({ name: 'Server 4 (Multi)', url: url });
+      servers.push({
+        name: 'Server 4 (Super)',
+        url: isTv
+          ? `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}`
+          : `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1`
+      });
     }
 
-    // 5. VidSrc Pro (Fast mirror)
+    // 5. VidSrc Pro (Reliable)
     if (tmdbId) {
       const url = isTv
         ? `https://vidsrc.pro/embed/tv/${tmdbId}/${season}/${episode}`
         : `https://vidsrc.pro/embed/movie/${tmdbId}`;
-      servers.push({ name: 'Server 5 (Global)', url: url });
+      servers.push({ name: 'Server 5 (Pro)', url: url });
     }
 
-    // 6. Anime Specific (Vidsrc.icu)
+    // 6. Anime / VidJoy
     if (malId || anilistId) {
       const id = anilistId || malId;
       servers.push({
-        name: 'Anime Server (Dual)',
+        name: 'Anime Server',
         url: `https://vidsrc.icu/embed/anime/${id}/${episode}/1`
       });
     }

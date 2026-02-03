@@ -160,10 +160,17 @@ function WatchContent() {
           minimized ? "pb-24" : "pb-6"
         )}>
           <div className="max-w-7xl mx-auto px-6 pt-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Clapperboard className="w-6 h-6 text-red-500" />
-              <h2 className="text-lg font-bold text-white">Episodes</h2>
-              {loadingEpisodes && <Loader2 className="w-4 h-4 animate-spin text-red-500" />}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Clapperboard className="w-6 h-6 text-red-500" />
+                <h2 className="text-lg font-bold text-white">Episodes</h2>
+                {tvDetails && (
+                  <span className="text-xs px-2 py-0.5 bg-white/10 rounded text-gray-400 font-medium">
+                    {tvDetails.seasons?.find((s: any) => s.season_number === season)?.episode_count || 0} Total
+                  </span>
+                )}
+                {loadingEpisodes && <Loader2 className="w-4 h-4 animate-spin text-red-500" />}
+              </div>
             </div>
 
             {loadingEpisodes ? (

@@ -54,15 +54,20 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             const detailsData = await detailsRes.json();
             const detail = detailsData[0];
             if (detail?.details) {
-                // Some versions of netflix54 return audio/subtitle list in details
-                audioTracks = detail.details.audio?.map((a: any) => ({
-                    language: a.language || a.name,
-                    url: '#' // Indicating it's internal to the player/mirror
-                })) || [];
-                subtitles = detail.details.subtitles?.map((s: any) => ({
-                    language: s.language || s.name,
+                // Ensure audio and subtitles are extracted correctly
+                const rawAudio = detail.details.audio || detail.details.audioTracks || [];
+                audioTracks = rawAudio.map((a: any) => ({
+                    id: `netflix-${a.language || a.name}-${Math.random()}`,
+                    language: a.language || a.name || 'Unknown',
+                    url: '#' // Indicating it's internal to the mirror
+                }));
+
+                const rawSubs = detail.details.subtitles || [];
+                subtitles = rawSubs.map((s: any) => ({
+                    id: `netflix-sub-${s.language || s.name}-${Math.random()}`,
+                    language: s.language || s.name || 'Unknown',
                     url: '#'
-                })) || [];
+                }));
             }
         }
 
