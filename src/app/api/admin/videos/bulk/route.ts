@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// Deployment Pulse: Netflix Metadata Fetching v3
+
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
 

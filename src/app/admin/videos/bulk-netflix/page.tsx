@@ -65,7 +65,7 @@ export default function BulkNetflixImport() {
                 description: m.overview,
                 thumbnailUrl: m.poster_path || '',
                 netflixId: m.id.toString(),
-                type: m.type === 'series' || m.type === 'show' ? 'series' : 'movie',
+                type: m.type === 'series' || m.type === 'show' || m.type.toLowerCase().includes('drama') ? 'series' : 'movie',
                 section: targetSection,
                 hlsUrl: commonHlsUrl.trim() || undefined,
                 audioTracks: commonAudioTracks.filter(a => a.language && a.url),
