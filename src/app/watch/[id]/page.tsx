@@ -57,7 +57,7 @@ function WatchContent() {
         console.log('Video data received:', data);
         if (data.error) {
           console.error('API Error:', data.error);
-          router.replace('/');
+          setVideo({ id: 'error', title: 'Error: ' + data.error } as any);
         } else {
           setVideo(data);
           // If it's a TV show, series, drama, or anime, fetch details for episode selection
@@ -102,7 +102,7 @@ function WatchContent() {
       })
       .catch((err) => {
         console.error('Watch Page Fetch Error:', err);
-        router.replace('/');
+        setVideo({ id: 'error', title: 'Fetch Error: ' + err.message } as any);
       })
       .finally(() => setLoading(false));
   }, [id, router]);
