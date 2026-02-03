@@ -539,6 +539,14 @@ export function CustomVideoPlayer({
               </div>
             )}
 
+            {/* Persistent Time Display for Mirrors (Laptop View Requirement) */}
+            {!currentSrc && !showControls && (
+              <div className="absolute top-4 right-4 z-[60] px-3 py-1.5 bg-black/50 backdrop-blur-md rounded-lg border border-white/10 text-[10px] font-bold text-white/80 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                <span>ELAPSED: {formatTime(currentTime)}</span>
+              </div>
+            )}
+
             {/* Control Overlay */}
             <AnimatePresence>
               {showControls && (
