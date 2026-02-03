@@ -250,12 +250,21 @@ export function CustomVideoPlayer({
     v.addEventListener('pause', onPause);
     v.addEventListener('ended', onEnded);
 
+    // Session Timer for Mirrors (since we can't get duration/time from iframe)
+    let sessionInterval: NodeJS.Timeout;
+    if (!currentSrc) {
+      sessionInterval = setInterval(() => {
+        if (playing) setCurrentTime(prev => prev + 1);
+      }, 1000);
+    }
+
     return () => {
       v.removeEventListener('timeupdate', onTimeUpdate);
       v.removeEventListener('durationchange', onDurationChange);
       v.removeEventListener('play', onPlay);
       v.removeEventListener('pause', onPause);
       v.removeEventListener('ended', onEnded);
+      if (sessionInterval) clearInterval(sessionInterval);
     };
   }, [currentSrc]);
 
@@ -655,14 +664,34 @@ export function CustomVideoPlayer({
                             </div>
 
                             <span className="text-sm font-medium tabular-nums text-white/90">
-                              {formatTime(currentTime)} <span className="text-white/40 mx-1">/</span> {formatTime(duration)}
+                              {formatTime(currentTime)}
+                              {duration > 0 && (
+                                <>
+                                  <span className="text-white/40 mx-1">/</span>
+                                  {formatTime(duration)}
+                                </>
+                              )}
+                              {!currentSrc && <span className="ml-2 text-[10px] text-gray-500 font-normal uppercase tracking-tighter">(Session Time)</span>}
                             </span>
                           </>
                         )}
                         {!currentSrc && (
-                          <span className="text-xs text-white/40 italic flex items-center gap-2">
-                            Use the mirror server player controls for playback at the bottom.
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={togglePlay}
+                              className="p-1 hover:text-red-500 transition-colors"
+                            >
+                              {playing ? <Pause className="w-6 h-6 fill-currentColor" /> : <Play className="w-6 h-6 fill-currentColor" />}
+                            </button>
+                            <span className="text-sm font-medium tabular-nums text-white/90">
+                              {formatTime(currentTime)}
+                              <span className="ml-2 text-[10px] text-gray-500 font-normal uppercase tracking-tighter">(Elapsed)</span>
+                            </span>
+                            <span className="text-[10px] text-white/40 italic flex items-center gap-2">
+                              Use mirror player for seeking.
+                            </span>
+                          </div>
                         )}
                       </div>
 
