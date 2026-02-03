@@ -6,12 +6,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('Fetching video with ID:', id);
+
   let video = await prisma.video.findUnique({
     where: { id },
     include: { subtitles: true, audioTracks: true },
   });
 
-  if (!video) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!video) {
+    console.error('Video not found for ID:', id);
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  console.log('Video found:', video.title, 'Type:', video.type, 'NetflixId:', video.netflixId, 'TMDB:', video.tmdbId);
 
   // JIT TMDB Discovery: If no tmdbId but has netflixId, try to find it
   if (!video.tmdbId && video.netflixId) {

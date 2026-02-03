@@ -49,10 +49,16 @@ function WatchContent() {
     if (!id) return;
     setLoading(true);
     fetch(`/api/videos/${id}`)
-      .then((res) => res.json())
+      .then((res) => {
+        console.log('API Response status:', res.status);
+        return res.json();
+      })
       .then((data) => {
-        if (data.error) router.replace('/');
-        else {
+        console.log('Video data received:', data);
+        if (data.error) {
+          console.error('API Error:', data.error);
+          router.replace('/');
+        } else {
           setVideo(data);
           // If it's a TV show, series, drama, or anime, fetch details for episode selection
           if (data.type === 'tv' || data.type === 'series' || data.type === 'drama' || data.type === 'anime') {
@@ -94,7 +100,10 @@ function WatchContent() {
           }
         }
       })
-      .catch(() => router.replace('/'))
+      .catch((err) => {
+        console.error('Watch Page Fetch Error:', err);
+        router.replace('/');
+      })
       .finally(() => setLoading(false));
   }, [id, router]);
 
