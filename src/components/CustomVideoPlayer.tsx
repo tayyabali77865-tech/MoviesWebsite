@@ -150,7 +150,7 @@ export function CustomVideoPlayer({
     if (!v) return;
     if (v.paused) {
       v.play().catch(() => { });
-      if (audioRef.current && audioTracks.length > 0) audioRef.current.play().catch(() => { });
+      if (audioRef.current && (audioTracks?.length || 0) > 0) audioRef.current.play().catch(() => { });
       setPlaying(true);
     } else {
       v.pause();
@@ -458,7 +458,7 @@ export function CustomVideoPlayer({
                   crossOrigin="anonymous"
                   controls={false}
                 >
-                  {subtitleOn && subtitleLang && (
+                  {subtitleOn && subtitleLang && subtitles && subtitles.length > 0 && (
                     <track
                       kind="subtitles"
                       src={subtitles.find((s) => s.language === subtitleLang)?.url}

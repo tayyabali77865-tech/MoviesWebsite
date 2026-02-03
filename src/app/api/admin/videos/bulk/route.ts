@@ -76,15 +76,19 @@ export async function POST(req: Request) {
                             const detailsData = await detailsRes.json();
                             const detail = detailsData[0];
                             if (detail?.details) {
-                                const netflixAudio = detail.details.audio?.map((a: any) => ({
-                                    language: a.language || a.name,
-                                    url: '#' // Placeholder indicating mirror-side audio
-                                })) || [];
+                                // Netflix API can return audio in multiple formats
+                                const rawAudio = detail.details.audio || detail.details.audioTracks || [];
+                                const netflixAudio = rawAudio.map((a: any) => ({
+                                    language: a.language || a.name || a.text || 'Unknown',
+                                    url: '#' // Placeholder indicating mirror-side internal audio
+                                }));
 
                                 // Merge with existing tracks, avoiding duplicates by language
                                 const existingLangs = new Set((v.audioTracks || []).map((t: any) => t.language.toLowerCase()));
-                                const newTracks = netflixAudio.filter((t: any) => !existingLangs.has(t.language.toLowerCase()));
+                                const newTracks = netflixAudio.filter((t: any) => t.language && !existingLangs.has(t.language.toLowerCase()));
                                 v.audioTracks = [...(v.audioTracks || []), ...newTracks];
+
+                                console.log(`Enriched "${v.title}" with ${newTracks.length} Netflix audio tracks`);
                             }
                         }
                     } catch (e) {
