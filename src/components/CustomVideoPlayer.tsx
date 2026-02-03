@@ -110,13 +110,13 @@ export function CustomVideoPlayer({
 
   // Reset iframe loading when server changes
   useEffect(() => {
-    if (!currentSrc && (tmdbId || malId)) {
+    if (!currentSrc && (tmdbId || malId || netflixId || anilistId)) {
       setIframeLoading(true);
-      // Set a timeout to hide loading after 5 seconds
-      const timer = setTimeout(() => setIframeLoading(false), 5000);
+      // Set a timeout to hide loading after 10 seconds (increased from 5 for slower mirrors)
+      const timer = setTimeout(() => setIframeLoading(false), 10000);
       return () => clearTimeout(timer);
     }
-  }, [currentServer, currentSrc, tmdbId, malId]);
+  }, [currentServer, currentSrc, tmdbId, malId, netflixId, anilistId]);
 
   // Initialize HLS
   useEffect(() => {
@@ -374,10 +374,17 @@ export function CustomVideoPlayer({
     // 7. Dedicated Netflix/Legacy Fallbacks
     if (netflixId) {
       servers.push({
-        name: 'Mirror 6 (Netflix)',
+        name: 'Mirror 6 (Netflix Stream)',
         url: isTv
           ? `https://vidsrc.me/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
           : `https://vidsrc.me/embed/movie?netflix=${netflixId}`
+      });
+      // Also add vidsrc.xyz for netflix just in case
+      servers.push({
+        name: 'Mirror 7 (Netflix Alt)',
+        url: isTv
+          ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+          : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`
       });
     } else if (tmdbId) {
       servers.push({
@@ -444,8 +451,7 @@ export function CustomVideoPlayer({
             <div className="absolute inset-0 w-full h-full">
               {currentSrc ? (
                 <video
-                  ref={videoRef}
-                  src={!hlsUrl ? currentSrc : undefined}
+                  src={!hlsUrl ? currentSrc || undefined : undefined}
                   className="w-full h-full object-contain"
                   onClick={togglePlay}
                   playsInline
