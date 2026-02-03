@@ -342,29 +342,20 @@ export function CustomVideoPlayer({
       });
     }
 
-    // 4. VidSrc CC (Multi-lang)
-    let ccUrl = '';
+    // 4. VidSrc.pro (Usually cleaner)
     if (tmdbId) {
-      ccUrl = isTv
-        ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
-    } else if (netflixId) {
-      ccUrl = isTv
-        ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
-        : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`;
+      const url = isTv
+        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.pro/embed/movie/${tmdbId}`;
+      servers.push({ name: 'Server 4 (VIP)', url });
     }
 
-    if (ccUrl) {
-      servers.push({ name: 'Server 5 (Globe)', url: ccUrl });
-    }
-
-    // 6. SuperEmbed (Hindi Search included)
-    if (tmdbId) {
+    // 5. Anime / VidJoy
+    if (malId || anilistId) {
+      const id = anilistId || malId;
       servers.push({
-        name: 'Server 6 (Super)',
-        url: isTv
-          ? `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}`
-          : `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1`
+        name: 'Anime Server',
+        url: `https://vidsrc.icu/embed/anime/${id}/${episode}/1`
       });
     }
 
@@ -818,7 +809,10 @@ export function CustomVideoPlayer({
                                           a.url === '#' && "opacity-60 cursor-default"
                                         )}
                                       >
-                                        <span>{a.language} {a.url === '#' && '(Mirror)'}</span>
+                                        <div className="flex items-center gap-2">
+                                          <span>{a.language}</span>
+                                          {a.language.toLowerCase().includes('hindi') && <span className="text-[10px] bg-red-600/20 text-red-500 px-1.5 py-0.5 rounded border border-red-500/20 font-bold uppercase tracking-tighter">Dubbed</span>}
+                                        </div>
                                         {a.url === '#' && <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-gray-400">In Player</span>}
                                       </button>
                                     ))}
