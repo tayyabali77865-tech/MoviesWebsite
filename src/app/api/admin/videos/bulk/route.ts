@@ -59,6 +59,37 @@ export async function POST(req: Request) {
                     }
                 }
 
+                // Auto-fetch Netflix Details (Audio Tracks)
+                if (v.netflixId) {
+                    try {
+                        const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'a30165b88amsh484b669fb808d67p186fd9jsn565d1f2fc267';
+                        const detailsUrl = `https://netflix54.p.rapidapi.com/title/details/?ids=${v.netflixId}&lang=en`;
+                        const detailsRes = await fetch(detailsUrl, {
+                            headers: {
+                                'x-rapidapi-host': 'netflix54.p.rapidapi.com',
+                                'x-rapidapi-key': RAPIDAPI_KEY
+                            }
+                        });
+                        if (detailsRes.ok) {
+                            const detailsData = await detailsRes.json();
+                            const detail = detailsData[0];
+                            if (detail?.details) {
+                                const netflixAudio = detail.details.audio?.map((a: any) => ({
+                                    language: a.language || a.name,
+                                    url: '#' // Placeholder indicating mirror-side audio
+                                })) || [];
+
+                                // Merge with existing tracks, avoiding duplicates by language
+                                const existingLangs = new Set((v.audioTracks || []).map((t: any) => t.language.toLowerCase()));
+                                const newTracks = netflixAudio.filter((t: any) => !existingLangs.has(t.language.toLowerCase()));
+                                v.audioTracks = [...(v.audioTracks || []), ...newTracks];
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Netflix Extended Detail Error:', e);
+                    }
+                }
+
                 const result = await prisma.video.create({
                     data: {
                         title: v.title,

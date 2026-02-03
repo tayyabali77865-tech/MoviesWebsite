@@ -291,104 +291,99 @@ export function CustomVideoPlayer({
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // 1. VidSrc XYZ (Reliable with Hindi Param)
-    let baseUrl = '';
+    // 1. VidSrc.pm (Very fast, Good drama support)
+    let pmUrl = '';
     if (tmdbId) {
-      baseUrl = isTv
+      pmUrl = isTv
+        ? `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.pm/embed/movie/${tmdbId}`;
+    } else if (netflixId) {
+      pmUrl = isTv
+        ? `https://vidsrc.pm/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+        : `https://vidsrc.pm/embed/movie?netflix=${netflixId}`;
+    }
+    if (pmUrl) {
+      servers.push({ name: 'Primary Server (Fast)', url: pmUrl });
+    }
+
+    // 2. VidSrc XYZ (Reliable with Hindi Param)
+    let xyzUrl = '';
+    if (tmdbId) {
+      xyzUrl = isTv
         ? `https://vidsrc.xyz/embed/tv/${tmdbId}/${season}/${episode}`
         : `https://vidsrc.xyz/embed/movie/${tmdbId}`;
     } else if (netflixId) {
-      baseUrl = isTv
+      xyzUrl = isTv
         ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
         : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`;
     } else if (malId) {
-      baseUrl = `https://vidsrc.xyz/embed/anime/${malId}/${episode}`;
+      xyzUrl = `https://vidsrc.xyz/embed/anime/${malId}/${episode}`;
     }
 
-    if (baseUrl) {
+    if (xyzUrl) {
       servers.push({
-        name: 'Primary Hindi Server',
-        url: `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}ds_lang=hi`
+        name: 'Hindi Dub Mirror',
+        url: `${xyzUrl}${xyzUrl.includes('?') ? '&' : '?'}ds_lang=hi`
       });
     }
 
-    // 2. VidSrc CC (Excellent Hindi/Multi-lang fallback)
-    let url = '';
+    // 3. VidSrc CC (Excellent Hindi/Multi-lang fallback)
+    let ccUrl = '';
     if (tmdbId) {
-      url = isTv
+      ccUrl = isTv
         ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${season}/${episode}`
         : `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
     } else if (netflixId) {
-      url = isTv
+      ccUrl = isTv
         ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
         : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`;
     } else if (malId) {
-      url = `https://vidsrc.cc/v2/embed/anime/${malId}/${episode}`;
+      ccUrl = `https://vidsrc.cc/v2/embed/anime/${malId}/${episode}`;
     }
 
-    if (url) {
-      servers.push({
-        name: 'Server 2 (Hindi Dub)',
-        url: url
-      });
+    if (ccUrl) {
+      servers.push({ name: 'Server 3 (Hindi)', url: ccUrl });
     }
 
-    // 3. Embed.su (Very high speed, includes Hindi)
+    // 4. Embed.su (Very high speed, includes Hindi)
     if (tmdbId) {
       const url = isTv
         ? `https://embed.su/embed/tv/${tmdbId}/${season}/${episode}`
         : `https://embed.su/embed/movie/${tmdbId}`;
-      servers.push({
-        name: 'Server 3 (Multi-audio)',
-        url: url
-      });
+      servers.push({ name: 'Server 4 (Multi)', url: url });
     }
 
-    // 4. VidSrc Pro (Fast mirror)
+    // 5. VidSrc Pro (Fast mirror)
     if (tmdbId) {
       const url = isTv
         ? `https://vidsrc.pro/embed/tv/${tmdbId}/${season}/${episode}`
         : `https://vidsrc.pro/embed/movie/${tmdbId}`;
-      servers.push({
-        name: 'Server 4 (Global)',
-        url: url
-      });
+      servers.push({ name: 'Server 5 (Global)', url: url });
     }
 
-    // 5. Anime Specific (Vidsrc.icu)
+    // 6. Anime Specific (Vidsrc.icu)
     if (malId || anilistId) {
       const id = anilistId || malId;
       servers.push({
-        name: 'Anime Server (Dual Audio)',
+        name: 'Anime Server (Dual)',
         url: `https://vidsrc.icu/embed/anime/${id}/${episode}/1`
       });
     }
 
-    // 6. Classic Fallback
-    if (tmdbId) {
-      const url = isTv
-        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${season}&e=${episode}`
-        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
-      servers.push({
-        name: 'Server 5 (Legacy)',
-        url: url
-      });
-    }
-
-    // 7. Dedicated Netflix Mirrors
+    // 7. Dedicated Netflix/Legacy Fallbacks
     if (netflixId) {
       servers.push({
-        name: 'Mirror 6 (Netflix 1)',
+        name: 'Mirror 6 (Netflix)',
         url: isTv
           ? `https://vidsrc.me/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
           : `https://vidsrc.me/embed/movie?netflix=${netflixId}`
       });
-
+    } else if (tmdbId) {
       servers.push({
-        name: 'Mirror 7 (Netflix 2)',
+        name: 'Legacy Server',
         url: isTv
-          ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
-          : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`
+          ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${season}&e=${episode}`
+          : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`
       });
     }
 
@@ -776,10 +771,20 @@ export function CustomVideoPlayer({
                                     {audioTracks.map((a) => (
                                       <button
                                         key={a.id}
-                                        onClick={() => { handleAudioChange(a.language); setShowSettings(false); }}
-                                        className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", currentAudioLang === a.language && "text-red-500 bg-red-500/5")}
+                                        onClick={() => {
+                                          if (a.url !== '#') {
+                                            handleAudioChange(a.language);
+                                            setShowSettings(false);
+                                          }
+                                        }}
+                                        className={clsx(
+                                          "w-full px-4 py-3 text-left text-sm hover:bg-white/5 flex items-center justify-between",
+                                          currentAudioLang === a.language && "text-red-500 bg-red-500/5",
+                                          a.url === '#' && "opacity-60 cursor-default"
+                                        )}
                                       >
-                                        {a.language} (External)
+                                        <span>{a.language} {a.url === '#' && '(Mirror)'}</span>
+                                        {a.url === '#' && <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-gray-400">In Player</span>}
                                       </button>
                                     ))}
                                     {!currentSrc && audioTracks.length > 0 && (
