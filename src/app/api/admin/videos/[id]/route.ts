@@ -11,7 +11,7 @@ export async function PATCH(
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { id } = await params;
+  const { id } = params;
   const body = await req.json();
   const {
     title,
@@ -72,7 +72,7 @@ export async function DELETE(
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { id } = await params;
+  const { id } = params;
   await prisma.video.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }
