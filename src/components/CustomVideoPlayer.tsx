@@ -301,20 +301,20 @@ export function CustomVideoPlayer({
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // 1. VidSrc.to (Top Priority - Very Stable)
+    // 1. VidSrc.in (Excellent Hindi/Multi-lang support - Top Priority)
+    if (tmdbId) {
+      const url = isTv
+        ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.in/embed/movie/${tmdbId}`;
+      servers.push({ name: 'Server 1 (Global/Hindi)', url });
+    }
+
+    // 2. VidSrc.to (Very Stable)
     if (tmdbId) {
       const url = isTv
         ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`
         : `https://vidsrc.to/embed/movie/${tmdbId}`;
-      servers.push({ name: 'Server 1 (Cloud)', url });
-    }
-
-    // 2. VidSrc.me (Excellent fallback)
-    if (tmdbId) {
-      const url = isTv
-        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${season}&e=${episode}`
-        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
-      servers.push({ name: 'Server 2 (Legacy)', url });
+      servers.push({ name: 'Server 2 (Stable Cloud)', url });
     }
 
     // 3. VidSrc XYZ (Native Hindi Support)
