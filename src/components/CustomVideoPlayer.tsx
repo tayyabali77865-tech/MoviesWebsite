@@ -292,22 +292,23 @@ export function CustomVideoPlayer({
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // 1. VidSrc.pm (Very fast)
-    let pmUrl = '';
+    // 1. VidSrc.to (Top Priority - Very Stable)
     if (tmdbId) {
-      pmUrl = isTv
-        ? `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://vidsrc.pm/embed/movie/${tmdbId}`;
-    } else if (netflixId) {
-      pmUrl = isTv
-        ? `https://vidsrc.pm/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
-        : `https://vidsrc.pm/embed/movie?netflix=${netflixId}`;
-    }
-    if (pmUrl) {
-      servers.push({ name: 'Primary (HD)', url: pmUrl });
+      const url = isTv
+        ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`
+        : `https://vidsrc.to/embed/movie/${tmdbId}`;
+      servers.push({ name: 'Server 1 (Cloud)', url });
     }
 
-    // 2. VidSrc XYZ (Reliable with Hindi Param)
+    // 2. VidSrc.me (Excellent fallback)
+    if (tmdbId) {
+      const url = isTv
+        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${season}&e=${episode}`
+        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
+      servers.push({ name: 'Server 2 (Legacy)', url });
+    }
+
+    // 3. VidSrc XYZ (Native Hindi Support)
     let xyzUrl = '';
     if (tmdbId) {
       xyzUrl = isTv
@@ -323,16 +324,16 @@ export function CustomVideoPlayer({
 
     if (xyzUrl) {
       servers.push({
-        name: 'Server 2 (Hindi Dub)',
+        name: 'Server 3 (Hindi Dub)',
         url: `${xyzUrl}${xyzUrl.includes('?') ? '&' : '?'}ds_lang=hi`
       });
       servers.push({
-        name: 'Server 3 (Multi-Lat)',
+        name: 'Server 4 (Multi)',
         url: xyzUrl
       });
     }
 
-    // 3. VidSrc CC (Excellent Hindi/Multi-lang fallback)
+    // 4. VidSrc CC (Multi-lang)
     let ccUrl = '';
     if (tmdbId) {
       ccUrl = isTv
@@ -342,38 +343,19 @@ export function CustomVideoPlayer({
       ccUrl = isTv
         ? `https://vidsrc.cc/v2/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
         : `https://vidsrc.cc/v2/embed/movie?netflix=${netflixId}`;
-    } else if (malId) {
-      ccUrl = `https://vidsrc.cc/v2/embed/anime/${malId}/${episode}`;
     }
 
     if (ccUrl) {
-      servers.push({ name: 'Server 3 (Hindi)', url: ccUrl });
+      servers.push({ name: 'Server 5 (Globe)', url: ccUrl });
     }
 
-    // 4. SuperEmbed (Fast, Hindi integrated)
+    // 6. SuperEmbed (Hindi Search included)
     if (tmdbId) {
       servers.push({
-        name: 'Server 4 (Super)',
+        name: 'Server 6 (Super)',
         url: isTv
           ? `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}`
           : `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1`
-      });
-    }
-
-    // 5. VidSrc Pro (Reliable)
-    if (tmdbId) {
-      const url = isTv
-        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://vidsrc.pro/embed/movie/${tmdbId}`;
-      servers.push({ name: 'Server 5 (Pro)', url: url });
-    }
-
-    // 6. Anime / VidJoy
-    if (malId || anilistId) {
-      const id = anilistId || malId;
-      servers.push({
-        name: 'Anime Server',
-        url: `https://vidsrc.icu/embed/anime/${id}/${episode}/1`
       });
     }
 
@@ -555,7 +537,10 @@ export function CustomVideoPlayer({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex flex-col bg-gradient-to-t from-black/95 via-transparent to-black/70 z-50"
+                  className={clsx(
+                    "absolute inset-0 flex flex-col z-50 transition-all duration-300",
+                    currentSrc ? "bg-gradient-to-t from-black/95 via-transparent to-black/70" : "bg-transparent"
+                  )}
                 >
                   {/* Top Bar */}
                   <div className="flex items-center justify-between p-4">
@@ -598,7 +583,7 @@ export function CustomVideoPlayer({
                       </motion.button>
                     </div>
                   )}
-                  {!currentSrc && <div className="flex-1" />}
+                  {!currentSrc && <div className="flex-1 pointer-events-none" />}
 
                   {/* Bottom Controls */}
                   <div className="p-4 space-y-4">
