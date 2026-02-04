@@ -299,6 +299,26 @@ export default function BulkDailymotionImport() {
                                         Import List
                                     </button>
                                 </form>
+                            ) : activeTab === 'playlist' ? (
+                                <form onSubmit={handleFetchPlaylist} className="flex gap-4">
+                                    <div className="relative flex-1 group">
+                                        <List className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={playlistUrl}
+                                            onChange={(e) => setPlaylistUrl(e.target.value)}
+                                            placeholder="Paste Dailymotion Playlist URL..."
+                                            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={searching || !playlistUrl}
+                                        className="px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-2xl font-bold transition-all"
+                                    >
+                                        Import List
+                                    </button>
+                                </form>
                             ) : (
                                 <form onSubmit={handleFetchVideo} className="flex gap-4">
                                     <div className="relative flex-1 group">
