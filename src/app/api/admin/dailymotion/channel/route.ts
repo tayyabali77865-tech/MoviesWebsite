@@ -18,13 +18,14 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const channelId = searchParams.get('channel');
+    const page = parseInt(searchParams.get('page') || '1');
 
     if (!channelId) {
         return NextResponse.json({ error: 'Channel name required (e.g. kicker-de)' }, { status: 400 });
     }
 
     try {
-        const url = `${BASE_URL}/api/v1/channels/videos?channel_name=${encodeURIComponent(channelId)}`;
+        const url = `${BASE_URL}/api/v1/channels/videos?channel_name=${encodeURIComponent(channelId)}&page=${page}`;
         const res = await fetch(url, {
             headers: {
                 'x-rapidapi-host': 'dailymotion-scraper.p.rapidapi.com',
@@ -51,9 +52,16 @@ export async function GET(req: Request) {
             duration: v.duration
         }));
 
+        // Determine if there are more videos
+        // Dailymotion typically returns 20-30 videos per page
+        // If we get less than 20, it's likely the last page
+        const hasMore = videos.length >= 20;
+
         return NextResponse.json({
             channel: data.data?.channel?.name || channelId,
-            videos
+            videos,
+            hasMore,
+            page
         });
 
     } catch (error) {
