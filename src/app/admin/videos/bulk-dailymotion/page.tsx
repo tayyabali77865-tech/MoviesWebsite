@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
-import { Search, Plus, Loader2, Check, Video, Settings, Languages } from 'lucide-react';
+import { Search, Plus, Loader2, Check, Video, Settings, Languages, List } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { clsx } from 'clsx';
@@ -77,8 +77,38 @@ export default function BulkDailymotionImport() {
         }
     };
 
-    const [activeTab, setActiveTab] = useState<'channel' | 'video'>('channel');
+    const [activeTab, setActiveTab] = useState<'channel' | 'video' | 'playlist'>('channel');
     const [videoUrl, setVideoUrl] = useState('');
+    const [playlistUrl, setPlaylistUrl] = useState('');
+
+    const handleFetchPlaylist = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!playlistUrl.trim()) return;
+        setSearching(true);
+        setResults([]);
+        try {
+            const res = await fetch(`/api/admin/dailymotion/playlist?url=${encodeURIComponent(playlistUrl)}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Fetch failed');
+
+            if (data.videos && Array.isArray(data.videos)) {
+                const mapped = data.videos.map((v: any) => ({
+                    id: v.id,
+                    title: v.title,
+                    thumbnail: v.thumbnail,
+                    duration: v.duration,
+                    created_time: Date.now() / 1000
+                }));
+                setResults(mapped);
+                toast.success(`Found ${mapped.length} videos`);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error instanceof Error ? error.message : 'Fetch failed');
+        } finally {
+            setSearching(false);
+        }
+    };
 
     const handleFetchVideo = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -216,6 +246,15 @@ export default function BulkDailymotionImport() {
                                     Channel Import
                                 </button>
                                 <button
+                                    onClick={() => { setActiveTab('playlist'); setResults([]); }}
+                                    className={clsx(
+                                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                                        activeTab === 'playlist' ? "bg-blue-600 text-white shadow-lg" : "text-gray-400 hover:text-white"
+                                    )}
+                                >
+                                    Playlist Import
+                                </button>
+                                <button
                                     onClick={() => { setActiveTab('video'); setResults([]); }}
                                     className={clsx(
                                         "px-4 py-2 rounded-lg text-sm font-medium transition-all",
@@ -239,6 +278,26 @@ export default function BulkDailymotionImport() {
                                         />
                                     </div>
                                     <button type="submit" className="hidden">Search</button>
+                                </form>
+                            ) : activeTab === 'playlist' ? (
+                                <form onSubmit={handleFetchPlaylist} className="flex gap-4">
+                                    <div className="relative flex-1 group">
+                                        <List className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={playlistUrl}
+                                            onChange={(e) => setPlaylistUrl(e.target.value)}
+                                            placeholder="Paste Dailymotion Playlist URL..."
+                                            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={searching || !playlistUrl}
+                                        className="px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-2xl font-bold transition-all"
+                                    >
+                                        Import List
+                                    </button>
                                 </form>
                             ) : (
                                 <form onSubmit={handleFetchVideo} className="flex gap-4">

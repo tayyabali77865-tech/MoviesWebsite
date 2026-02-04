@@ -8,8 +8,8 @@ export async function GET(req: Request) {
   const videos = await prisma.video.findMany({
     where: {
       OR: [
-        { title: { contains: q } },
-        { description: { contains: q } },
+        { title: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
       ],
     },
     select: { id: true, title: true, thumbnailUrl: true, category: true },
