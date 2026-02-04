@@ -10,62 +10,46 @@ export async function GET(req: Request) {
     }
 
     try {
-        // 1. Fetch Playlist Page HTML
-        const res = await fetch(playlistUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-        });
+        // 1. Extract Playlist ID from URL
+        // Pattern: .../playlist/x12345 or .../playlist/x12345_slug
+        const playlistIdMatch = playlistUrl.match(/\/playlist\/([a-zA-Z0-9]+)/);
+        const playlistId = playlistIdMatch ? playlistIdMatch[1] : null;
+
+        if (!playlistId) {
+            return NextResponse.json({ error: 'Invalid Playlist URL. Could not find ID.' }, { status: 400 });
+        }
+
+        // 2. Fetch Videos from Dailymotion Public API
+        // Using fields: id, title, thumbnail_url, duration, owner.screenname
+        const apiUrl = `https://api.dailymotion.com/playlist/${playlistId}/videos?fields=id,title,thumbnail_url,duration,owner.screenname&limit=50`;
+
+        const res = await fetch(apiUrl);
 
         if (!res.ok) {
-            return NextResponse.json({ error: 'Failed to access playlist page' }, { status: 404 });
+            const errorData = await res.json();
+            return NextResponse.json({
+                error: errorData.error?.message || 'Failed to fetch playlist data from Dailymotion API'
+            }, { status: res.status });
         }
 
-        const html = await res.text();
+        const data = await res.json();
 
-        // 2. Regex for Video IDs (Pattern: /video/x12345)
-        const videoIdPattern = /\/video\/([a-zA-Z0-9]+)/g;
-        const ids = new Set<string>();
-
-        let match;
-        while ((match = videoIdPattern.exec(html)) !== null) {
-            // Filter out short garbage matches if any
-            if (match[1].length > 3) {
-                ids.add(match[1]);
-            }
+        if (!data.list || data.list.length === 0) {
+            return NextResponse.json({ error: 'No videos found in this playlist' }, { status: 404 });
         }
 
-        if (ids.size === 0) {
-            // Try locating standard JSON blobs if regex fails
-            return NextResponse.json({ error: 'No videos found in playlist link' }, { status: 404 });
-        }
-
-        const uniqueIds = Array.from(ids).slice(0, 50); // Limit to 50 for performance
-
-        // 3. Fetch Details for each ID via oEmbed (Parallel)
-        const videos = await Promise.all(uniqueIds.map(async (id) => {
-            try {
-                const oembedUrl = `https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${id}`;
-                const r = await fetch(oembedUrl);
-                if (!r.ok) return null;
-                const d = await r.json();
-                return {
-                    id: id,
-                    title: d.title,
-                    thumbnail: d.thumbnail_url,
-                    author: d.author_name,
-                    duration: d.duration || 0, // Fallback
-                };
-            } catch (err) {
-                return null;
-            }
+        // 3. Map to internal format
+        const videos = data.list.map((v: any) => ({
+            id: v.id,
+            title: v.title,
+            thumbnail: v.thumbnail_url,
+            author: v.owner?.screenname || 'Unknown',
+            duration: v.duration || 0,
         }));
 
-        const validVideos = videos.filter(v => v !== null);
-
         return NextResponse.json({
-            videos: validVideos,
-            total: validVideos.length
+            videos: videos,
+            total: videos.length
         });
 
     } catch (error) {
