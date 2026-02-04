@@ -11,7 +11,10 @@ export default async function AdminVideosPage() {
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
     redirect('/auth/login?callbackUrl=/admin/videos');
   }
-  const videos = await prisma.video.findMany({
+  const videos = await (prisma.video as any).findMany({
+    where: {
+      parentId: null, // Only show parent videos, not child episodes
+    },
     orderBy: { createdAt: 'desc' },
     include: { subtitles: true },
   }) as any;

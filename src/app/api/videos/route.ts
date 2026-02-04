@@ -13,7 +13,9 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get('page') || '0');
   const search = searchParams.get('search');
 
-  const where: Prisma.VideoWhereInput = {};
+  const where: Prisma.VideoWhereInput = {
+    parentId: null as any, // Only show parent videos, not child episodes
+  };
 
   if (search) {
     where.OR = [
