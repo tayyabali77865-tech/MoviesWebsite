@@ -75,6 +75,11 @@ model Video {
   autoplay      Boolean  @default(false)
   subtitles     Subtitle[]
   audioTracks   AudioTrack[]
+  seasonNumber  Int?     @default(1)
+  episodeNumber Int?
+  parentId      String?
+  parent        Video?   @relation("SeriesEpisodes", fields: [parentId], references: [id])
+  episodes      Video[]  @relation("SeriesEpisodes")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

@@ -2,10 +2,11 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
 import { CustomVideoPlayer } from '@/components/CustomVideoPlayer';
-import { Loader2, Clapperboard, ChevronRight, Play } from 'lucide-react';
+import { Loader2, Clapperboard, ChevronRight, Play, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface Video {
@@ -44,6 +45,7 @@ function WatchContent() {
   const [loading, setLoading] = useState(true);
   const [tvDetails, setTvDetails] = useState<any>(null);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+  const [internalEpisodes, setInternalEpisodes] = useState<any[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -114,6 +116,16 @@ function WatchContent() {
                 .catch(err => console.error('Failed to fetch Anime episodes', err))
                 .finally(() => setLoadingEpisodes(false));
             }
+
+            // Always fetch internal episodes as well
+            fetch(`/api/videos/series/${id}`)
+              .then(res => res.json())
+              .then(seriesData => {
+                if (seriesData.episodes?.length > 0) {
+                  setInternalEpisodes(seriesData.episodes);
+                }
+              })
+              .catch(err => console.error('Internal Series Error:', err));
           }
         }
       })
@@ -242,6 +254,42 @@ function WatchContent() {
               </div>
             ) : (
               <p className="text-gray-500 italic text-sm py-2">No episodes found</p>
+            )}
+
+            {/* Internal Web-Series/Drama Episodes */}
+            {internalEpisodes.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <div className="flex items-center gap-2 mb-3 text-sm font-bold text-blue-400">
+                  <Play className="w-3 h-3" /> External List (Drama)
+                </div>
+                <div className="overflow-x-auto pb-2">
+                  <div className="flex gap-3 min-w-max">
+                    {internalEpisodes.map((ep) => (
+                      <button
+                        key={ep.id}
+                        onClick={() => router.push(`/watch/${ep.id}`)}
+                        className={clsx(
+                          "group relative w-48 aspect-video rounded-xl overflow-hidden border-2 transition-all",
+                          id === ep.id
+                            ? "border-blue-500 ring-4 ring-blue-500/20"
+                            : "border-white/10 hover:border-white/30"
+                        )}
+                      >
+                        <Image src={ep.thumbnailUrl} alt={ep.title} fill className="object-cover transition-transform group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-3 flex flex-col justify-end">
+                          <span className="text-[10px] font-bold text-blue-400 uppercase">Episode {ep.episodeNumber}</span>
+                          <h3 className="text-xs font-bold text-white line-clamp-1">{ep.title}</h3>
+                        </div>
+                        {id === ep.id && (
+                          <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-1">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>

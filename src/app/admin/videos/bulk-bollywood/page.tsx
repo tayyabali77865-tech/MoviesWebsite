@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
 import { Search, Plus, Loader2, Check, Film, Settings, Languages, Music } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -102,7 +101,6 @@ export default function BulkBollywoodImport() {
 
     return (
         <>
-            <Navbar />
             <Sidebar />
             <main className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-[#0a0a0a]">
                 <div className="max-w-7xl mx-auto">
