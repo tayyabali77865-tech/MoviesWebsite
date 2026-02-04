@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'a30165b88amsh484b669fb808d67p186fd9jsn565d1f2fc267';
 const BASE_URL = 'https://dailymotion-scraper.p.rapidapi.com';
 
 if (!RAPIDAPI_KEY) {
@@ -45,8 +45,9 @@ export async function GET(req: Request) {
         const videos = (data.data?.channel?.videos || []).map((v: any) => ({
             id: v.xid, // Dailymotion ID
             title: v.title,
-            thumbnail: v.thumbnail_url || null, // Assuming thumbnail field exists or is similar, probe showed minimal fields so we might miss this
-            created_time: v.created_time,
+            // Check for thumbnails object (x720, x480, x360, x240, x120, x60)
+            thumbnail: v.thumbnails?.x720 || v.thumbnails?.x480 || v.thumbnails?.x360 || v.thumbnails?.x240 || v.thumbnail_url || null,
+            created_time: v.created_at ? new Date(v.created_at).getTime() : Date.now(),
             duration: v.duration
         }));
 
