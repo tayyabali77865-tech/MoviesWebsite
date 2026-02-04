@@ -22,13 +22,16 @@ export default async function HomePage({
     // For Manga, Trailer, and Anime, we ignore the section tag to show "all" content in every section randomly.
     // For others (Movies), we assume strict sectioning for now.
     const isGlobalType = currentType === 'manga' || currentType === 'trailer' || currentType === 'anime';
-    const where: any = { type: currentType };
+    const where: any = {
+      type: currentType,
+      parentId: null // Only show parent videos, not child episodes
+    };
 
     if (!isGlobalType) {
       where.section = section;
     }
 
-    const videos = await prisma.video.findMany({
+    const videos = await (prisma.video as any).findMany({
       where,
       include: { subtitles: true },
       orderBy: { createdAt: 'desc' }, // Fetch latest first
@@ -46,20 +49,20 @@ export default async function HomePage({
       fetchSection('upcoming'),
       fetchSection('random'),
       // Fetch some random anime for the global section
-      prisma.video.findMany({
-        where: { type: 'anime' },
+      (prisma.video as any).findMany({
+        where: { type: 'anime', parentId: null },
         include: { subtitles: true },
         take: 10,
       }).then(v => v.sort(() => Math.random() - 0.5)),
       // Fetch random dramas
-      prisma.video.findMany({
-        where: { type: 'drama' },
+      (prisma.video as any).findMany({
+        where: { type: 'drama', parentId: null },
         include: { subtitles: true },
         take: 10,
       }).then(v => v.sort(() => Math.random() - 0.5)),
       // Fetch random webseries
-      prisma.video.findMany({
-        where: { type: 'series' },
+      (prisma.video as any).findMany({
+        where: { type: 'series', parentId: null },
         include: { subtitles: true },
         take: 10,
       }).then(v => v.sort(() => Math.random() - 0.5)),

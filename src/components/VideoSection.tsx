@@ -44,10 +44,16 @@ export function VideoSection({
     setLoading(true);
     try {
       const res = await fetch(`/api/videos?section=${section}&type=${type}&page=${page + 1}`);
+      if (!res.ok) {
+        throw new Error('Failed to load videos');
+      }
       const data = await res.json();
       setVideos((prev) => [...prev, ...(data.videos || [])]);
       setHasMore(data.hasMore ?? false);
       setPage((p) => p + 1);
+    } catch (error) {
+      console.error('Load more error:', error);
+      setHasMore(false); // Stop trying to load more on error
     } finally {
       setLoading(false);
     }
