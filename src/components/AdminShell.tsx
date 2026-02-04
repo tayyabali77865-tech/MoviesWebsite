@@ -16,6 +16,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     { href: '/admin/videos/bulk-movie', label: 'Bulk Movie', icon: Video },
     { href: '/admin/videos/bulk-bollywood', label: 'Bulk Bollywood', icon: Video },
     { href: '/admin/videos/bulk-netflix', label: 'Bulk Netflix', icon: Video },
+    { href: '/admin/videos/bulk-dailymotion', label: 'Bulk Dailymotion', icon: Video },
     { href: '/admin/carousel', label: 'Carousel', icon: Image },
   ];
 
