@@ -107,6 +107,7 @@ export function CustomVideoPlayer({
   const [iframeLoading, setIframeLoading] = useState(true);
 
   const currentSrc = hlsUrl || sources[resolution === 'auto' ? '720' : resolution] || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
+  const isDailymotion = currentSrc && currentSrc.includes('dailymotion.com');
 
   // Reset iframe loading when server changes
   useEffect(() => {
@@ -564,11 +565,12 @@ export function CustomVideoPlayer({
                   exit={{ opacity: 0 }}
                   className={clsx(
                     "absolute inset-0 flex flex-col z-50 transition-all duration-300",
-                    currentSrc ? "bg-gradient-to-t from-black/95 via-transparent to-black/70" : "bg-transparent"
+                    isDailymotion ? "pointer-events-none" : "",
+                    currentSrc && !isDailymotion ? "bg-gradient-to-t from-black/95 via-transparent to-black/70" : "bg-transparent"
                   )}
                 >
                   {/* Top Bar */}
-                  <div className="flex items-center justify-between p-4">
+                  <div className={clsx("flex items-center justify-between p-4", isDailymotion && "pointer-events-auto bg-gradient-to-b from-black/80 to-transparent")}>
                     {onClose && (
                       <button
                         type="button"
@@ -597,7 +599,7 @@ export function CustomVideoPlayer({
                   </div>
 
                   {/* Middle Section (Playback Control) - Only show for direct sources */}
-                  {currentSrc && (
+                  {currentSrc && !isDailymotion && (
                     <div className="flex-1 flex items-center justify-center">
                       <motion.button
                         whileTap={{ scale: 0.9 }}
@@ -611,7 +613,8 @@ export function CustomVideoPlayer({
                   {!currentSrc && <div className="flex-1 pointer-events-none" />}
 
                   {/* Bottom Controls */}
-                  <div className="p-4 space-y-4">
+                  {/* Bottom Controls */}
+                  <div className={clsx("p-4 space-y-4", isDailymotion && "hidden")}>
                     {/* Progress Bar - Only for direct sources */}
                     {currentSrc && (
                       <div
@@ -798,147 +801,149 @@ export function CustomVideoPlayer({
                                     )}
                                   </div>
                                 )}
-
-                                {settingsTab === 'audio' && (
-                                  <div className="py-2">
-                                    <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
-                                      <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
-                                      <span className="text-xs font-bold uppercase text-gray-500">Audio Selection</span>
-                                    </div>
-                                    <button
-                                      onClick={() => { handleAudioChange('Default'); setShowSettings(false); }}
-                                      className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", currentAudioLang === 'Default' && "text-red-500 bg-red-500/5")}
-                                    >
-                                      Default (Internal)
-                                    </button>
-                                    {audioTracks.map((a) => (
-                                      <button
-                                        key={a.id}
-                                        onClick={() => {
-                                          if (a.url !== '#') {
-                                            handleAudioChange(a.language);
-                                            setShowSettings(false);
-                                          }
-                                        }}
-                                        className={clsx(
-                                          "w-full px-4 py-3 text-left text-sm hover:bg-white/5 flex items-center justify-between",
-                                          currentAudioLang === a.language && "text-red-500 bg-red-500/5",
-                                          a.url === '#' && "opacity-60 cursor-default"
-                                        )}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <span>{a.language}</span>
-                                          {a.language.toLowerCase().includes('hindi') && <span className="text-[10px] bg-red-600/20 text-red-500 px-1.5 py-0.5 rounded border border-red-500/20 font-bold uppercase tracking-tighter">Dubbed</span>}
-                                        </div>
-                                        {a.url === '#' && <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-gray-400">In Player</span>}
-                                      </button>
-                                    ))}
-                                    {!currentSrc && audioTracks.length > 0 && (
-                                      <div className="px-4 py-2 text-[10px] text-red-400 italic">
-                                        * Mirror audio may not perfectly sync with external tracks.
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                {settingsTab === 'subtitles' && (
-                                  <div className="py-2">
-                                    <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
-                                      <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
-                                      <span className="text-xs font-bold uppercase text-gray-500">Subtitles</span>
-                                    </div>
-                                    <button
-                                      onClick={() => { setSubtitleOn(false); setShowSettings(false); }}
-                                      className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", !subtitleOn && "text-red-500 bg-red-500/5")}
-                                    >
-                                      Off
-                                    </button>
-                                    {subtitles.map((s) => (
-                                      <button
-                                        key={s.id}
-                                        onClick={() => { setSubtitleLang(s.language); setSubtitleOn(true); setShowSettings(false); }}
-                                        className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", (subtitleOn && subtitleLang === s.language) && "text-red-500 bg-red-500/5")}
-                                      >
-                                        {s.language}
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {settingsTab === 'quality' && (
-                                  <div className="py-2">
-                                    <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
-                                      <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
-                                      <span className="text-xs font-bold uppercase text-gray-500">Quality</span>
-                                    </div>
-                                    {hlsUrl ? (
-                                      <div className="px-4 py-4 text-xs text-gray-400 italic text-center">
-                                        Quality is automatically managed by HLS for the best experience.
-                                      </div>
-                                    ) : (
-                                      <>
-                                        <button
-                                          onClick={() => { setResolution('auto'); setShowSettings(false); }}
-                                          className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", resolution === 'auto' && "text-red-500 bg-red-500/5")}
-                                        >
-                                          Auto
-                                        </button>
-                                        {RESOLUTIONS.filter(r => sources[r.key]).map((r) => (
-                                          <button
-                                            key={r.key}
-                                            onClick={() => { setResolution(r.key); setShowSettings(false); }}
-                                            className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", resolution === r.key && "text-red-500 bg-red-500/5")}
-                                          >
-                                            {r.label}
-                                          </button>
-                                        ))}
-                                      </>
-                                    )}
-                                  </div>
-                                )}
-
-                                {settingsTab === 'speed' && (
-                                  <div className="py-2">
-                                    <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
-                                      <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
-                                      <span className="text-xs font-bold uppercase text-gray-500">Playback Speed</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-1 p-2">
-                                      {SPEEDS.map((s) => (
-                                        <button
-                                          key={s}
-                                          onClick={() => { setSpeed(s); setShowSettings(false); }}
-                                          className={clsx(
-                                            "px-3 py-2 text-sm rounded-lg transition-colors",
-                                            speed === s ? "bg-red-600 text-white" : "hover:bg-white/5"
-                                          )}
-                                        >
-                                          {s}x
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </motion.div>
+                              </div>
                             )}
-                          </AnimatePresence>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={toggleFullscreen}
-                          className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                        >
-                          {fullscreen ? <Minimize2 className="w-6 h-6 text-red-500" /> : <Maximize className="w-6 h-6" />}
-                        </button>
+
+                            {settingsTab === 'audio' && (
+                              <div className="py-2">
+                                <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
+                                  <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
+                                  <span className="text-xs font-bold uppercase text-gray-500">Audio Selection</span>
+                                </div>
+                                <button
+                                  onClick={() => { handleAudioChange('Default'); setShowSettings(false); }}
+                                  className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", currentAudioLang === 'Default' && "text-red-500 bg-red-500/5")}
+                                >
+                                  Default (Internal)
+                                </button>
+                                {audioTracks.map((a) => (
+                                  <button
+                                    key={a.id}
+                                    onClick={() => {
+                                      if (a.url !== '#') {
+                                        handleAudioChange(a.language);
+                                        setShowSettings(false);
+                                      }
+                                    }}
+                                    className={clsx(
+                                      "w-full px-4 py-3 text-left text-sm hover:bg-white/5 flex items-center justify-between",
+                                      currentAudioLang === a.language && "text-red-500 bg-red-500/5",
+                                      a.url === '#' && "opacity-60 cursor-default"
+                                    )}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span>{a.language}</span>
+                                      {a.language.toLowerCase().includes('hindi') && <span className="text-[10px] bg-red-600/20 text-red-500 px-1.5 py-0.5 rounded border border-red-500/20 font-bold uppercase tracking-tighter">Dubbed</span>}
+                                    </div>
+                                    {a.url === '#' && <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-gray-400">In Player</span>}
+                                  </button>
+                                ))}
+                                {!currentSrc && audioTracks.length > 0 && (
+                                  <div className="px-4 py-2 text-[10px] text-red-400 italic">
+                                    * Mirror audio may not perfectly sync with external tracks.
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {settingsTab === 'subtitles' && (
+                              <div className="py-2">
+                                <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
+                                  <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
+                                  <span className="text-xs font-bold uppercase text-gray-500">Subtitles</span>
+                                </div>
+                                <button
+                                  onClick={() => { setSubtitleOn(false); setShowSettings(false); }}
+                                  className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", !subtitleOn && "text-red-500 bg-red-500/5")}
+                                >
+                                  Off
+                                </button>
+                                {subtitles.map((s) => (
+                                  <button
+                                    key={s.id}
+                                    onClick={() => { setSubtitleLang(s.language); setSubtitleOn(true); setShowSettings(false); }}
+                                    className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", (subtitleOn && subtitleLang === s.language) && "text-red-500 bg-red-500/5")}
+                                  >
+                                    {s.language}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+
+                            {settingsTab === 'quality' && (
+                              <div className="py-2">
+                                <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
+                                  <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
+                                  <span className="text-xs font-bold uppercase text-gray-500">Quality</span>
+                                </div>
+                                {hlsUrl ? (
+                                  <div className="px-4 py-4 text-xs text-gray-400 italic text-center">
+                                    Quality is automatically managed by HLS for the best experience.
+                                  </div>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() => { setResolution('auto'); setShowSettings(false); }}
+                                      className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", resolution === 'auto' && "text-red-500 bg-red-500/5")}
+                                    >
+                                      Auto
+                                    </button>
+                                    {RESOLUTIONS.filter(r => sources[r.key]).map((r) => (
+                                      <button
+                                        key={r.key}
+                                        onClick={() => { setResolution(r.key); setShowSettings(false); }}
+                                        className={clsx("w-full px-4 py-3 text-left text-sm hover:bg-white/5", resolution === r.key && "text-red-500 bg-red-500/5")}
+                                      >
+                                        {r.label}
+                                      </button>
+                                    ))}
+                                  </>
+                                )}
+                              </div>
+                            )}
+
+                            {settingsTab === 'speed' && (
+                              <div className="py-2">
+                                <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2">
+                                  <button onClick={() => setSettingsTab('main')} className="p-1 hover:bg-white/10 rounded"><ChevronDown className="w-4 h-4 rotate-90" /></button>
+                                  <span className="text-xs font-bold uppercase text-gray-500">Playback Speed</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1 p-2">
+                                  {SPEEDS.map((s) => (
+                                    <button
+                                      key={s}
+                                      onClick={() => { setSpeed(s); setShowSettings(false); }}
+                                      className={clsx(
+                                        "px-3 py-2 text-sm rounded-lg transition-colors",
+                                        speed === s ? "bg-red-600 text-white" : "hover:bg-white/5"
+                                      )}
+                                    >
+                                      {s}x
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
+                            )}
+                        </AnimatePresence>
                       </div>
+                      <button
+                        type="button"
+                        onClick={toggleFullscreen}
+                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        {fullscreen ? <Minimize2 className="w-6 h-6 text-red-500" /> : <Maximize className="w-6 h-6" />}
+                      </button>
                     </div>
                   </div>
+                </div>
                 </motion.div>
               )}
-            </AnimatePresence>
-          </>
+          </AnimatePresence>
+      </>
         )}
-      </div>
+    </div >
 
       <style jsx global>{`
         @keyframes spin-slow {
