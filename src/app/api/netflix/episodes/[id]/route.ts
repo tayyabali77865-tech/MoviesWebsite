@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
-if (!RAPIDAPI_KEY) {
-    throw new Error('RAPIDAPI_KEY is not defined');
-}
 const NETFLIX_BASE_URL = 'https://netflix54.p.rapidapi.com';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +9,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     if (!id) {
         return NextResponse.json({ error: 'Id required' }, { status: 400 });
+    }
+
+    if (!RAPIDAPI_KEY) {
+        return NextResponse.json({ error: 'Server Config Error: Missing API Key' }, { status: 500 });
     }
 
     try {

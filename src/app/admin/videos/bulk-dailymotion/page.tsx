@@ -30,21 +30,85 @@ export default function BulkDailymotionImport() {
     const [isDramaMode, setIsDramaMode] = useState(true); // Default to Drama as per user request
     const [commonAudioTracks, setCommonAudioTracks] = useState<{ language: string; url: string }[]>([]);
 
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
     const router = useRouter();
+
+    const fetchVideos = async (query: string, pageNum: number) => {
+        const res = await fetch(`/api/admin/dailymotion/channel?channel=${encodeURIComponent(query)}&page=${pageNum}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Search failed');
+        return data;
+    };
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!channelName.trim()) return;
         setSearching(true);
         setResults([]);
+        setPage(1);
+        setHasMore(true);
         try {
-            const res = await fetch(`/api/admin/dailymotion/channel?channel=${encodeURIComponent(channelName)}`);
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Search failed');
+            const data = await fetchVideos(channelName, 1);
             setResults(data.videos || []);
+            setHasMore(data.hasMore);
         } catch (error) {
             console.error(error);
             toast.error(error instanceof Error ? error.message : 'Search failed');
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const handleLoadMore = async () => {
+        if (!hasMore || searching) return;
+        const nextPage = page + 1;
+        setSearching(true);
+        try {
+            const data = await fetchVideos(channelName, nextPage);
+            setResults(prev => [...prev, ...(data.videos || [])]);
+            setPage(nextPage);
+            setHasMore(data.hasMore);
+        } catch (error) {
+            toast.error("Failed to load more videos");
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const [activeTab, setActiveTab] = useState<'channel' | 'video'>('channel');
+    const [videoUrl, setVideoUrl] = useState('');
+
+    const handleFetchVideo = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!videoUrl.trim()) return;
+        setSearching(true);
+        setResults([]);
+        try {
+            const res = await fetch(`/api/admin/dailymotion/video?url=${encodeURIComponent(videoUrl)}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Fetch failed');
+
+            if (data.video) {
+                setResults([{
+                    id: data.video.id,
+                    title: data.video.title,
+                    thumbnail: data.video.thumbnail,
+                    duration: data.video.duration,
+                    created_time: Date.now() / 1000 // Mock time or parse if available
+                }]);
+                // Auto-select it for convenience
+                setSelected([{
+                    id: data.video.id,
+                    title: data.video.title,
+                    thumbnail: data.video.thumbnail,
+                    duration: data.video.duration
+                }]);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error instanceof Error ? error.message : 'Fetch failed');
         } finally {
             setSearching(false);
         }
@@ -140,19 +204,63 @@ export default function BulkDailymotionImport() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Search & Results */}
                         <div className="lg:col-span-2 space-y-6">
-                            <form onSubmit={handleSearch} className="flex gap-4">
-                                <div className="relative flex-1 group">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-                                    <input
-                                        type="text"
-                                        value={channelName}
-                                        onChange={(e) => setChannelName(e.target.value)}
-                                        placeholder="Enter Channel Name (e.g. kicker-de)..."
-                                        className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
-                                    />
-                                </div>
-                                <button type="submit" className="hidden">Search</button>
-                            </form>
+                            {/* Tabs */}
+                            <div className="flex p-1 bg-white/5 rounded-xl border border-white/10 w-fit">
+                                <button
+                                    onClick={() => { setActiveTab('channel'); setResults([]); setPage(1); }}
+                                    className={clsx(
+                                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                                        activeTab === 'channel' ? "bg-blue-600 text-white shadow-lg" : "text-gray-400 hover:text-white"
+                                    )}
+                                >
+                                    Channel Import
+                                </button>
+                                <button
+                                    onClick={() => { setActiveTab('video'); setResults([]); }}
+                                    className={clsx(
+                                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                                        activeTab === 'video' ? "bg-blue-600 text-white shadow-lg" : "text-gray-400 hover:text-white"
+                                    )}
+                                >
+                                    Single Video
+                                </button>
+                            </div>
+
+                            {activeTab === 'channel' ? (
+                                <form onSubmit={handleSearch} className="flex gap-4">
+                                    <div className="relative flex-1 group">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={channelName}
+                                            onChange={(e) => setChannelName(e.target.value)}
+                                            placeholder="Enter Channel Name (e.g. kicker-de)..."
+                                            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+                                        />
+                                    </div>
+                                    <button type="submit" className="hidden">Search</button>
+                                </form>
+                            ) : (
+                                <form onSubmit={handleFetchVideo} className="flex gap-4">
+                                    <div className="relative flex-1 group">
+                                        <Video className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={videoUrl}
+                                            onChange={(e) => setVideoUrl(e.target.value)}
+                                            placeholder="Paste Dailymotion Video URL..."
+                                            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={searching || !videoUrl}
+                                        className="px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-2xl font-bold transition-all"
+                                    >
+                                        Fetch
+                                    </button>
+                                </form>
+                            )}
 
                             {searching ? (
                                 <div className="flex flex-col items-center justify-center py-20 opacity-50">
@@ -204,6 +312,21 @@ export default function BulkDailymotionImport() {
                                         <Search className="w-8 h-8 text-gray-600" />
                                     </div>
                                     <p className="text-gray-400 font-medium">Enter a channel name to listing videos.</p>
+                                </div>
+                            )}
+
+                            {/* Load More Button */}
+                            {results.length > 0 && hasMore && (
+                                <div className="flex justify-center pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleLoadMore}
+                                        disabled={searching}
+                                        className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                                        {searching ? 'Loading...' : 'Load More Videos'}
+                                    </button>
                                 </div>
                             )}
                         </div>
