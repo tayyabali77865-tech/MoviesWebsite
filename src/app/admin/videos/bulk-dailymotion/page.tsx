@@ -73,7 +73,7 @@ export default function BulkDailymotionImport() {
                     title: m.title,
                     description: `Imported from Dailymotion Channel: ${channelName}`,
                     thumbnailUrl: m.thumbnail || '',
-                    videoUrl: `https://www.dailymotion.com/video/${m.id}`, // Store direct link or embed? usually direct link for downloaders or player
+                    url720: `https://www.dailymotion.com/video/${m.id}`, // Store as 720p source for now
                     // Logic for Drama: Sequence episodes
                     type: isDrama ? 'series' : 'movie',
                     section: targetSection,

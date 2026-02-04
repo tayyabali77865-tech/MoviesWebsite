@@ -445,7 +445,7 @@ export function CustomVideoPlayer({
           <>
             {/* Background Media Container */}
             <div className="absolute inset-0 w-full h-full">
-              {currentSrc ? (
+              {currentSrc && !currentSrc.includes('dailymotion.com') ? (
                 <video
                   src={!hlsUrl ? currentSrc || undefined : undefined}
                   className="w-full h-full object-contain"
@@ -464,6 +464,15 @@ export function CustomVideoPlayer({
                     />
                   )}
                 </video>
+              ) : currentSrc && currentSrc.includes('dailymotion.com') ? (
+                <div className="relative w-full h-full bg-black">
+                  <iframe
+                    src={`https://www.dailymotion.com/embed/video/${currentSrc.split('/video/')[1]?.split('?')[0]}?autoplay=${playing ? 1 : 0}&queue-enable=0&ui-logo=0`}
+                    className="w-full h-full border-0 absolute inset-0"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    allowFullScreen
+                  />
+                </div>
               ) : (tmdbId || malId || netflixId || anilistId) ? (
                 <div className="relative w-full h-full bg-black">
                   {iframeLoading && (
