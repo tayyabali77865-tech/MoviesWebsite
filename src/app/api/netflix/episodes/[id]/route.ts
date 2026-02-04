@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'a30165b88amsh484b669fb808d67p186fd9jsn565d1f2fc267';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
+
+if (!RAPIDAPI_KEY) {
+    throw new Error('RAPIDAPI_KEY is not defined');
+}
 const NETFLIX_BASE_URL = 'https://netflix54.p.rapidapi.com';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -16,7 +20,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         const seasonsRes = await fetch(seasonsUrl, {
             headers: {
                 'x-rapidapi-host': 'netflix54.p.rapidapi.com',
-                'x-rapidapi-key': RAPIDAPI_KEY
+                'x-rapidapi-key': RAPIDAPI_KEY as string
             }
         });
 
@@ -43,7 +47,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         const detailsRes = await fetch(detailsUrl, {
             headers: {
                 'x-rapidapi-host': 'netflix54.p.rapidapi.com',
-                'x-rapidapi-key': RAPIDAPI_KEY
+                'x-rapidapi-key': RAPIDAPI_KEY as string
             }
         });
 

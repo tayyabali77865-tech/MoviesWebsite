@@ -64,12 +64,12 @@ export async function POST(req: Request) {
                 // Auto-fetch Netflix Details (Audio Tracks)
                 if (v.netflixId) {
                     try {
-                        const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'a30165b88amsh484b669fb808d67p186fd9jsn565d1f2fc267';
+                        const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
                         const detailsUrl = `https://netflix54.p.rapidapi.com/title/details/?ids=${v.netflixId}&lang=en`;
                         const detailsRes = await fetch(detailsUrl, {
                             headers: {
                                 'x-rapidapi-host': 'netflix54.p.rapidapi.com',
-                                'x-rapidapi-key': RAPIDAPI_KEY
+                                'x-rapidapi-key': RAPIDAPI_KEY as string
                             }
                         });
                         if (detailsRes.ok) {

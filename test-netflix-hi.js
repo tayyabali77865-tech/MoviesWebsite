@@ -1,4 +1,4 @@
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'a30165b88amsh484b669fb808d67p186fd9jsn565d1f2fc267';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 const NETFLIX_ID = '81177634'; // Lookism 
 
 async function test() {
