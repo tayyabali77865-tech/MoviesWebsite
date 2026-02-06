@@ -21,7 +21,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-900 flex overflow-x-hidden">
+    <div className="min-h-screen bg-surface-900 flex max-w-full w-auto">
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
@@ -86,7 +86,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
       </aside>
-      <main className="flex-1 md:ml-64 p-4 md:p-8 pt-14 md:pt-8 min-w-0 overflow-x-hidden">{children}</main>
+      <main className="flex-1 md:ml-64 p-4 md:p-8 pt-14 md:pt-8 min-w-0">{children}</main>
     </div>
   );
 }

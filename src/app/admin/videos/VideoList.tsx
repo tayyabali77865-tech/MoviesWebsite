@@ -106,7 +106,7 @@ export function VideoList({ videos }: { videos: Video[] }) {
           <div
             key={v.id}
             className={clsx(
-                "w-full flex items-center gap-4 bg-surface-800 rounded-xl border border-white/10 p-4 transition-all group",
+                "flex items-center gap-4 bg-surface-800 rounded-xl border border-white/10 p-4 transition-all group min-w-0 max-w-full w-auto",
               selectedIds.includes(v.id) ? "ring-2 ring-blue-500 border-transparent bg-blue-500/5" : "hover:border-white/20"
             )}
           >
