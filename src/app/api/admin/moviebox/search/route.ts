@@ -18,14 +18,15 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query');
+    const type = searchParams.get('type') || 'movie'; // movie, tv, anime, manga, documentry
 
     if (!query) {
         return NextResponse.json({ error: 'Query required' }, { status: 400 });
     }
 
     try {
-        // Updated to use MovieBox API
-        const url = `${MOVIEBOX_BASE_URL}/movie-or-tv/list?keyword=${encodeURIComponent(query)}&category=movie`;
+        // Updated to use MovieBox API with dynamic category
+        const url = `${MOVIEBOX_BASE_URL}/movie-or-tv/list?keyword=${encodeURIComponent(query)}&category=${encodeURIComponent(type)}`;
 
         console.log('Fetching MovieBox:', url);
 
@@ -56,7 +57,7 @@ export async function GET(req: Request) {
             title: item.title,
             overview: item.description || item.postTitle || 'No description available',
             poster_path: item.cover?.url || null,
-            type: 'movie', // forcing movie since we queried category=movie
+            type: type === 'tv' ? 'series' : type, // Normalize 'tv' to 'series'
             release_year: item.releaseDate ? item.releaseDate.split('-')[0] : null
         }));
 

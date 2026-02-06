@@ -18,6 +18,7 @@ interface MovieBoxResult {
 
 export default function BulkNetflixImport() {
     const [query, setQuery] = useState('');
+    const [searchType, setSearchType] = useState('movie'); // movie, tv, anime, manga, documentry
     const [searching, setSearching] = useState(false);
     const [results, setResults] = useState<MovieBoxResult[]>([]);
     const [selected, setSelected] = useState<MovieBoxResult[]>([]);
@@ -36,7 +37,7 @@ export default function BulkNetflixImport() {
         setResults([]);
         try {
             // Updated Endpoint: internally uses MovieBox now
-            const res = await fetch(`/api/admin/netflix/search?query=${encodeURIComponent(query)}`);
+            const res = await fetch(`/api/admin/moviebox/search?query=${encodeURIComponent(query)}&type=${searchType}`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Search failed');
             setResults(data.results || []);
@@ -65,7 +66,9 @@ export default function BulkNetflixImport() {
                 description: m.overview,
                 thumbnailUrl: m.poster_path || '',
                 netflixId: m.id, // Storing MovieBox ID in netflixId field for now
-                type: 'movie', // forcing movie as per API
+                type: m.type === 'series' || m.type === 'tv' ? 'series' :
+                    m.type === 'anime' ? 'anime' :
+                        m.type === 'drama' ? 'drama' : 'movie', // Default to movie, but respect API return
                 section: targetSection,
                 hlsUrl: commonHlsUrl.trim() || undefined,
                 audioTracks: commonAudioTracks.filter(a => a.language && a.url),
@@ -126,18 +129,39 @@ export default function BulkNetflixImport() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Search & Results */}
                         <div className="lg:col-span-2 space-y-6">
-                            <form onSubmit={handleSearch} className="flex gap-4">
-                                <div className="relative flex-1 group">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-500 transition-colors" />
-                                    <input
-                                        type="text"
-                                        value={query}
-                                        onChange={(e) => setQuery(e.target.value)}
-                                        placeholder="Search movies (e.g. Avengers, Batman)..."
-                                        className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all font-medium"
-                                    />
+                            <form onSubmit={handleSearch} className="space-y-4">
+                                {/* Category Tabs */}
+                                <div className="flex gap-2 p-1 bg-white/5 rounded-xl w-fit">
+                                    {['movie', 'tv', 'anime', 'manga', 'documentary'].map((t) => (
+                                        <button
+                                            key={t}
+                                            type="button"
+                                            onClick={() => setSearchType(t)}
+                                            className={clsx(
+                                                "px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all",
+                                                searchType === t
+                                                    ? "bg-red-600 text-white shadow-lg"
+                                                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                                            )}
+                                        >
+                                            {t === 'tv' ? 'Series' : t}
+                                        </button>
+                                    ))}
                                 </div>
-                                <button type="submit" className="hidden">Search</button>
+
+                                <div className="flex gap-4">
+                                    <div className="relative flex-1 group">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-500 transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={query}
+                                            onChange={(e) => setQuery(e.target.value)}
+                                            placeholder={`Search ${searchType}... (e.g. Avengers, One Piece)`}
+                                            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all font-medium"
+                                        />
+                                    </div>
+                                    <button type="submit" className="hidden">Search</button>
+                                </div>
                             </form>
 
                             {searching ? (
