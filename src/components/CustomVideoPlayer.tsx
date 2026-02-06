@@ -19,6 +19,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { div } from 'framer-motion/client';
 
 interface Subtitle {
   id: string;
@@ -454,9 +455,6 @@ export function CustomVideoPlayer({
           </>
         )}
       </div>
-    </div>
-  </div>
-</div>
-</div>
-</div>
-</>
+    </>
+  );
+}
