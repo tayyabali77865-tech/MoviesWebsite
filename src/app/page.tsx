@@ -54,19 +54,19 @@ export default async function HomePage({
         where: { type: 'anime', parentId: null },
         include: { subtitles: true },
         take: 10,
-      }).then(v => v.sort(() => Math.random() - 0.5)),
+        }).then(v => v.sort(() => Math.random() - 0.5)),
       // Fetch random dramas
       (prisma.video as any).findMany({
         where: { type: 'drama', parentId: null },
         include: { subtitles: true },
         take: 10,
-      }).then(v => v.sort(() => Math.random() - 0.5)),
+        }).then(v => v.sort(() => Math.random() - 0.5)),
       // Fetch random webseries
       (prisma.video as any).findMany({
         where: { type: 'series', parentId: null },
         include: { subtitles: true },
         take: 10,
-      }).then(v => v.sort(() => Math.random() - 0.5)),
+        }).then(v => v.sort(() => Math.random() - 0.5)),
     ]);
 
   const typeLabel = currentType === 'anime' ? 'Anime' : currentType === 'manga' ? 'Manga' : currentType === 'trailer' ? 'Trailers' : 'Movies';
