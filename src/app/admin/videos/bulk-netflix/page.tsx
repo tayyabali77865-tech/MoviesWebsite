@@ -7,20 +7,20 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { clsx } from 'clsx';
 
-interface NetflixResult {
-    id: number;
+interface MovieBoxResult {
+    id: string;
     title: string;
     poster_path: string | null;
     overview: string;
     type: string;
-    release_year?: number;
+    release_year?: string;
 }
 
 export default function BulkNetflixImport() {
     const [query, setQuery] = useState('');
     const [searching, setSearching] = useState(false);
-    const [results, setResults] = useState<NetflixResult[]>([]);
-    const [selected, setSelected] = useState<NetflixResult[]>([]);
+    const [results, setResults] = useState<MovieBoxResult[]>([]);
+    const [selected, setSelected] = useState<MovieBoxResult[]>([]);
     const [loading, setLoading] = useState(false);
 
     const [commonHlsUrl, setCommonHlsUrl] = useState('');
@@ -35,6 +35,7 @@ export default function BulkNetflixImport() {
         setSearching(true);
         setResults([]);
         try {
+            // Updated Endpoint: internally uses MovieBox now
             const res = await fetch(`/api/admin/netflix/search?query=${encodeURIComponent(query)}`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Search failed');
@@ -47,7 +48,7 @@ export default function BulkNetflixImport() {
         }
     };
 
-    const toggleSelect = (item: NetflixResult) => {
+    const toggleSelect = (item: MovieBoxResult) => {
         setSelected(prev =>
             prev.find(m => m.id === item.id)
                 ? prev.filter(m => m.id !== item.id)
@@ -63,8 +64,8 @@ export default function BulkNetflixImport() {
                 title: m.title || 'Unknown',
                 description: m.overview,
                 thumbnailUrl: m.poster_path || '',
-                netflixId: m.id.toString(),
-                type: m.type === 'series' || m.type === 'show' || m.type.toLowerCase().includes('drama') ? 'series' : 'movie',
+                netflixId: m.id, // Storing MovieBox ID in netflixId field for now
+                type: 'movie', // forcing movie as per API
                 section: targetSection,
                 hlsUrl: commonHlsUrl.trim() || undefined,
                 audioTracks: commonAudioTracks.filter(a => a.language && a.url),
@@ -81,7 +82,7 @@ export default function BulkNetflixImport() {
                 throw new Error(data.error || 'Import failed');
             }
 
-            toast.success(`Successfully imported ${selected.length} Netflix titles`);
+            toast.success(`Successfully imported ${selected.length} titles`);
             router.push('/admin/videos');
             router.refresh();
         } catch (error) {
@@ -108,9 +109,9 @@ export default function BulkNetflixImport() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div>
                             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                                <Tv className="text-red-600" /> Netflix Bulk Import
+                                <Tv className="text-red-600" /> MovieBox Import
                             </h1>
-                            <p className="text-gray-400 mt-1 text-sm">Search and import movies and series from Netflix RapidAPI.</p>
+                            <p className="text-gray-400 mt-1 text-sm">Search and import movies from MovieBox API.</p>
                         </div>
                         <button
                             onClick={handleImport}
@@ -132,7 +133,7 @@ export default function BulkNetflixImport() {
                                         type="text"
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
-                                        placeholder="Search Netflix titles (e.g. Stranger Things, Money Heist)..."
+                                        placeholder="Search movies (e.g. Avengers, Batman)..."
                                         className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all font-medium"
                                     />
                                 </div>
@@ -142,7 +143,7 @@ export default function BulkNetflixImport() {
                             {searching ? (
                                 <div className="flex flex-col items-center justify-center py-20 opacity-50">
                                     <Loader2 className="w-12 h-12 animate-spin text-red-600 mb-4" />
-                                    <p className="text-gray-400 font-medium">Querying Netflix database...</p>
+                                    <p className="text-gray-400 font-medium">Querying MovieBox database...</p>
                                 </div>
                             ) : results.length > 0 ? (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -170,7 +171,7 @@ export default function BulkNetflixImport() {
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-4 flex flex-col justify-end">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <span className="text-[10px] font-bold bg-white/10 backdrop-blur-md px-1.5 py-0.5 rounded uppercase text-gray-300">
-                                                                NETFLIX
+                                                                MOVIEBOX
                                                             </span>
                                                             <span className="text-[10px] font-medium text-gray-400">{year}</span>
                                                         </div>
@@ -192,7 +193,7 @@ export default function BulkNetflixImport() {
                                     <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <Search className="w-8 h-8 text-gray-600" />
                                     </div>
-                                    <p className="text-gray-400 font-medium">Start searching to find Netflix titles.</p>
+                                    <p className="text-gray-400 font-medium">Start searching to find movies.</p>
                                 </div>
                             )}
                         </div>
