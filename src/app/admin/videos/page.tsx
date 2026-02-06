@@ -43,6 +43,12 @@ export default async function AdminVideosPage() {
             <Plus className="w-5 h-5 text-orange-500" /> Bulk Bollywood
           </Link>
           <Link
+            href="/admin/videos/bulk-hindi-dub"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
+          >
+            <Plus className="w-5 h-5 text-green-500" /> Hindi Dubbed
+          </Link>
+          <Link
             href="/admin/videos/bulk-moviebox"
             className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
           >
