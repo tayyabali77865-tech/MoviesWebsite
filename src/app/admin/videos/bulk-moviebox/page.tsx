@@ -41,7 +41,12 @@ export default function BulkMovieBoxImport() {
 
             const res = await fetch(url);
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Search failed');
+            if (!res.ok) {
+                const errorMsg = data.debug?.keyPrefix
+                    ? `Quota Exceeded for Key: ${data.debug.keyPrefix}... (Status: ${res.status})`
+                    : (data.error || 'Search failed');
+                throw new Error(errorMsg);
+            }
             setResults(data.results || []);
         } catch (error) {
             console.error(error);

@@ -22,7 +22,8 @@ export async function GET(req: Request) {
             headers: {
                 'x-rapidapi-host': 'moviebox-api.p.rapidapi.com',
                 'x-rapidapi-key': RAPIDAPI_KEY as string
-            }
+            },
+            cache: 'no-store'
         });
 
         if (!res.ok) {

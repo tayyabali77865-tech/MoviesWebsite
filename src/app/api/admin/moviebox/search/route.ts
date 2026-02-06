@@ -39,14 +39,19 @@ export async function GET(req: Request) {
             headers: {
                 'x-rapidapi-host': 'moviebox-api.p.rapidapi.com',
                 'x-rapidapi-key': RAPIDAPI_KEY as string
-            }
+            },
+            cache: 'no-store' // IMPORTANT: Prevent Next.js from caching 429 errors
         });
 
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
-            console.error('MovieBox API Error Status:', res.status, errorData);
+            console.error('MovieBox API Error:', res.status, errorData);
+
             if (res.status === 429) {
-                return NextResponse.json({ error: 'MovieBox API Quota Exceeded. Please upgrade your RapidAPI plan.' }, { status: 429 });
+                return NextResponse.json({
+                    error: `MovieBox API Quota Exceeded (Key: ${RAPIDAPI_KEY?.substring(0, 5)}...). Please check your RapidAPI dashboard or upgrade plan.`,
+                    debug: { status: 429, keyPrefix: RAPIDAPI_KEY?.substring(0, 5) }
+                }, { status: 429 });
             }
             throw new Error(errorData.message || `MovieBox API error: ${res.status}`);
         }
