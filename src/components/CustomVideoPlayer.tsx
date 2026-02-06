@@ -319,7 +319,7 @@ export function CustomVideoPlayer({
     if (xyzUrl) {
       servers.push({
         name: 'Server 1 (Hindi Dub)',
-        url: `${xyzUrl}${xyzUrl.includes('?') ? '&' : '?'}ds_lang=hi`
+        url: `${xyzUrl}${xyzUrl.includes('?') ? '&' : '?'}ds_lang=hi&lang=hi`
       });
       servers.push({
         name: 'Server 2 (Global HD)',
@@ -564,7 +564,6 @@ export function CustomVideoPlayer({
                   exit={{ opacity: 0 }}
                   className={clsx(
                     "absolute inset-0 flex flex-col z-50 transition-all duration-300",
-                    (isDailymotion || !currentSrc) ? "pointer-events-none" : "",
                     currentSrc && !isDailymotion ? "bg-gradient-to-t from-black/95 via-transparent to-black/70" : "bg-transparent"
                   )}
                 >
@@ -612,88 +611,84 @@ export function CustomVideoPlayer({
                   {!currentSrc && <div className="flex-1 pointer-events-none" />}
 
                   {/* Bottom Controls */}
-                  {/* Bottom Controls */}
-                  <div className={clsx("p-4 space-y-4", isDailymotion && "hidden", !currentSrc && "bg-transparent")}>
-                    {/* Progress Bar - Only for direct sources */}
-                    {currentSrc && (
+                  <div className={clsx("p-4 space-y-4", isDailymotion && "hidden")}>
+                    {/* Progress Bar - Show for all sources */}
+                    <div
+                      className="h-2 bg-white/20 rounded-full cursor-pointer group relative"
+                      onClick={currentSrc ? seek : undefined}
+                    >
                       <div
-                        className="h-2 bg-white/20 rounded-full cursor-pointer group relative"
-                        onClick={seek}
-                      >
-                        <div
-                          className="h-full bg-red-600 rounded-full transition-all group-hover:bg-red-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
-                          style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
-                        />
-                        <div
-                          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full scale-100 transition-transform shadow-lg"
-                          style={{ left: duration ? `${(currentTime / duration) * 100}%` : '0%', marginLeft: '-8px' }}
-                        />
-                      </div>
-                    )}
+                        className="h-full bg-red-600 rounded-full transition-all group-hover:bg-red-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+                        style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                      />
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full scale-100 transition-transform shadow-lg"
+                        style={{ left: duration ? `${(currentTime / duration) * 100}%` : '0%', marginLeft: '-8px' }}
+                      />
+                    </div>
 
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        {currentSrc && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => skip(-10)}
-                              className="p-1 hover:text-red-500 transition-colors"
-                              title="Skip back 10s"
-                            >
-                              <RotateCcw className="w-5 h-5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={togglePlay}
-                              className="p-1 hover:text-red-500 transition-colors"
-                            >
-                              {playing ? <Pause className="w-6 h-6 fill-currentColor" /> : <Play className="w-6 h-6 fill-currentColor" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => skip(10)}
-                              className="p-1 hover:text-red-500 transition-colors"
-                              title="Skip forward 10s"
-                            >
-                              <RotateCw className="w-5 h-5" />
-                            </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => skip(-10)}
+                            className="p-1 hover:text-red-500 transition-colors"
+                            title="Skip back 10s"
+                            disabled={!currentSrc}
+                          >
+                            <RotateCcw className="w-5 h-5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={togglePlay}
+                            className="p-1 hover:text-red-500 transition-colors"
+                          >
+                            {playing ? <Pause className="w-6 h-6 fill-currentColor" /> : <Play className="w-6 h-6 fill-currentColor" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => skip(10)}
+                            className="p-1 hover:text-red-500 transition-colors"
+                            title="Skip forward 10s"
+                            disabled={!currentSrc}
+                          >
+                            <RotateCw className="w-5 h-5" />
+                          </button>
 
-                            <div className="flex items-center gap-2 group/vol">
-                              <button
-                                type="button"
-                                onClick={toggleMute}
-                                className="p-1 hover:text-red-500 transition-colors"
-                              >
-                                {muted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                              </button>
-                              <input
-                                type="range"
-                                min={0}
-                                max={1}
-                                step={0.05}
-                                value={muted ? 0 : volume}
-                                onChange={(e) => {
-                                  setVolume(parseFloat(e.target.value));
-                                  setMuted(false);
-                                }}
-                                className="w-0 group-hover/vol:w-20 transition-all accent-red-600 h-1"
-                              />
-                            </div>
+                          <div className="flex items-center gap-2 group/vol">
+                            <button
+                              type="button"
+                              onClick={toggleMute}
+                              className="p-1 hover:text-red-500 transition-colors"
+                            >
+                              {muted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                            </button>
+                            <input
+                              type="range"
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              value={muted ? 0 : volume}
+                              onChange={(e) => {
+                                setVolume(parseFloat(e.target.value));
+                                setMuted(false);
+                              }}
+                              className="w-0 group-hover/vol:w-20 transition-all accent-red-600 h-1"
+                            />
+                          </div>
 
-                            <span className="text-sm font-medium tabular-nums text-white/90">
-                              {formatTime(currentTime)}
-                              {duration > 0 && (
-                                <>
-                                  <span className="text-white/40 mx-1">/</span>
-                                  {formatTime(duration)}
-                                </>
-                              )}
-                              {!currentSrc && <span className="ml-2 text-[10px] text-gray-500 font-normal uppercase tracking-tighter">(Session Time)</span>}
-                            </span>
-                          </>
-                        )}
-                        {!currentSrc && <div className="flex-1" />}
+                          <span className="text-sm font-medium tabular-nums text-white/90">
+                            {formatTime(currentTime)}
+                            {duration > 0 && (
+                              <>
+                                <span className="text-white/40 mx-1">/</span>
+                                {formatTime(duration)}
+                              </>
+                            )}
+                            {!currentSrc && <span className="ml-2 text-[10px] text-gray-500 font-normal uppercase tracking-tighter">(Session Time)</span>}
+                          </span>
+                        </>
                       </div>
 
                       <div className={clsx("flex items-center gap-2", !currentSrc && "pointer-events-auto")}>
