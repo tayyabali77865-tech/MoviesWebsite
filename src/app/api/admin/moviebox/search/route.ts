@@ -21,12 +21,16 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query') || '';
     const type = searchParams.get('type') || 'movie'; // movie, tv, anime, manga, documentry
+    const genre = searchParams.get('genre');
 
     try {
         // Updated: If no query, we just list the latest items for that category (Discovery Mode)
         let url = `${MOVIEBOX_BASE_URL}/movie-or-tv/list?category=${encodeURIComponent(type)}`;
         if (query.trim()) {
             url += `&keyword=${encodeURIComponent(query)}`;
+        }
+        if (genre) {
+            url += `&genre=${encodeURIComponent(genre)}`;
         }
 
         console.log('Fetching MovieBox:', url);

@@ -28,12 +28,18 @@ export default function BulkMovieBoxImport() {
     const [targetSection, setTargetSection] = useState('new');
     const [commonAudioTracks, setCommonAudioTracks] = useState<{ language: string; url: string }[]>([]);
 
+    const [genres, setGenres] = useState<{ id: string; name: string }[]>([]);
+    const [selectedGenre, setSelectedGenre] = useState('');
+
     const router = useRouter();
 
-    const fetchResults = useCallback(async (q: string, type: string) => {
+    const fetchResults = useCallback(async (q: string, type: string, genre?: string) => {
         setSearching(true);
         try {
-            const res = await fetch(`/api/admin/moviebox/search?query=${encodeURIComponent(q)}&type=${type}`);
+            let url = `/api/admin/moviebox/search?query=${encodeURIComponent(q)}&type=${type}`;
+            if (genre) url += `&genre=${encodeURIComponent(genre)}`;
+
+            const res = await fetch(url);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Search failed');
             setResults(data.results || []);
@@ -45,14 +51,34 @@ export default function BulkMovieBoxImport() {
         }
     }, []);
 
-    // Fetch latest on tab click or load
+    // Fetch genres when category changes
     useEffect(() => {
-        fetchResults(query, searchType);
-    }, [searchType, fetchResults]);
+        const fetchFilters = async () => {
+            try {
+                const res = await fetch(`/api/admin/moviebox/filters?category=${searchType}`);
+                const data = await res.json();
+                if (data.code === 0 && data.data?.typeList) {
+                    const genreItem = data.data.typeList[0]?.items?.find((i: any) => i.filterType === 'genre');
+                    if (genreItem) {
+                        setGenres(genreItem.filterValsV2 || []);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch filters:', err);
+            }
+        };
+        fetchFilters();
+        setSelectedGenre(''); // Reset genre on tab change
+    }, [searchType]);
+
+    // Fetch latest on tab click or load or genre change
+    useEffect(() => {
+        fetchResults(query, searchType, selectedGenre);
+    }, [searchType, selectedGenre, fetchResults]);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
-        fetchResults(query, searchType);
+        fetchResults(query, searchType, selectedGenre);
     };
 
     const toggleSelect = (item: MovieBoxResult) => {
@@ -166,6 +192,20 @@ export default function BulkMovieBoxImport() {
                                             className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all font-medium"
                                         />
                                     </div>
+                                    {genres.length > 0 && (
+                                        <select
+                                            value={selectedGenre}
+                                            onChange={(e) => setSelectedGenre(e.target.value)}
+                                            className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium cursor-pointer"
+                                        >
+                                            <option value="" className="bg-zinc-900 italic">All Genres</option>
+                                            {genres.map((g) => (
+                                                <option key={g.id} value={g.id} className="bg-zinc-900">
+                                                    {g.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                     <button type="submit" className="hidden">Search</button>
                                 </div>
                             </form>
