@@ -21,44 +21,44 @@ export default async function AdminVideosPage() {
 
   return (
     <div className="w-full overflow-x-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Videos</h1>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      <div className="flex items-center justify-between mb-8 gap-4">
+        <h1 className="text-3xl font-bold text-white">Videos</h1>
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Link
             href="/admin/videos/bulk"
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 text-blue-500" /> <span className="hidden sm:inline">Bulk Anime</span>
+            <Plus className="w-4 h-4 text-blue-500" /> Bulk Anime
           </Link>
           <Link
             href="/admin/videos/bulk-movie"
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 text-red-500" /> <span className="hidden sm:inline">Bulk Movie</span>
+            <Plus className="w-4 h-4 text-red-500" /> Bulk Movie
           </Link>
           <Link
             href="/admin/videos/bulk-bollywood"
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 text-orange-500" /> <span className="hidden sm:inline">Bulk Bollywood</span>
+            <Plus className="w-4 h-4 text-orange-500" /> Bulk Bollywood
           </Link>
           <Link
             href="/admin/videos/bulk-hindi-dub"
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 text-green-500" /> <span className="hidden sm:inline">Hindi Dubbed</span>
+            <Plus className="w-4 h-4 text-green-500" /> Hindi Dubbed
           </Link>
           <Link
             href="/admin/videos/bulk-moviebox"
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 text-purple-500" /> <span className="hidden sm:inline">MovieBox</span>
+            <Plus className="w-4 h-4 text-purple-500" /> MovieBox
           </Link>
           <Link
             href="/admin/videos/new"
-            className="flex items-center gap-1.5 px-3 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors text-sm sm:text-base whitespace-nowrap"
           >
-            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Video</span>
+            <Plus className="w-4 h-4" /> Add Video
           </Link>
         </div>
       </div>
