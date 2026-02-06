@@ -3,6 +3,7 @@ import { Carousel } from '@/components/Carousel';
 import { VideoSection } from '@/components/VideoSection';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
+import { AdsterraAd } from '@/components/AdsterraAd';
 import { prisma } from '@/lib/prisma';
 import { Tv, Clapperboard as Series } from 'lucide-react';
 
@@ -76,6 +77,12 @@ export default async function HomePage({
       <Sidebar />
       <main className="min-h-screen pt-16">
         <Carousel slides={carousel} />
+
+        {/* Ad after carousel */}
+        <div className="max-w-[1920px] mx-auto py-4">
+          <AdsterraAd position="after-carousel" className="mb-4" />
+        </div>
+
         <div className="max-w-[1920px] mx-auto py-8">
           <>
             {/* "The text 'New Movies' must be displayed as 'NEW' only" */}
@@ -99,6 +106,11 @@ export default async function HomePage({
               <VideoSection title="Upcoming" section="upcoming" type={currentType} initialVideos={upcomingVideos} />
             )}
             <VideoSection title="Random" section="random" type={currentType} initialVideos={randomVideos} />
+
+            {/* Ad at bottom of page */}
+            <div className="py-8">
+              <AdsterraAd position="bottom-page" />
+            </div>
           </>
         </div>
       </main>

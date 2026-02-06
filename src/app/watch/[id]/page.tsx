@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Navbar } from '@/components/Navbar';
 import { Sidebar } from '@/components/Sidebar';
 import { CustomVideoPlayer } from '@/components/CustomVideoPlayer';
+import { AdsterraAd } from '@/components/AdsterraAd';
 import { Loader2, Clapperboard, ChevronRight, Play, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -181,6 +182,11 @@ function WatchContent() {
         episode={episode}
         type={video.type}
       />
+
+      {/* Ad below video player */}
+      <div className="max-w-7xl mx-auto px-6 pt-6">
+        <AdsterraAd position="below-player" className="mb-6" />
+      </div>
 
       {/* Episode Selection UI - Always visible for series/drama/anime if an ID is present */}
       {(video.type === 'tv' || video.type === 'series' || video.type === 'drama' || video.type === 'anime') && (video.tmdbId || video.netflixId || video.malId || video.anilistId) && (
