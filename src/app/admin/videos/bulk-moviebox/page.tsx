@@ -16,7 +16,7 @@ interface MovieBoxResult {
     release_year?: string;
 }
 
-export default function BulkNetflixImport() {
+export default function BulkMovieBoxImport() {
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState('movie'); // movie, tv, anime, manga, documentry
     const [searching, setSearching] = useState(false);

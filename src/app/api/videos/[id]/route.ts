@@ -20,7 +20,7 @@ export async function GET(
 
   console.log('Video found:', video.title, 'Type:', video.type, 'NetflixId:', video.netflixId, 'TMDB:', video.tmdbId);
 
-  // JIT TMDB Discovery: If no tmdbId but has netflixId, try to find it
+  // JIT TMDB Discovery: If no tmdbId but has External ID (MovieBox), try to find it
   if (!video.tmdbId && video.netflixId) {
     try {
       const TMDB_API_KEY = process.env.TMDB_API_KEY;

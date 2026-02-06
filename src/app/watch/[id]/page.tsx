@@ -64,23 +64,7 @@ function WatchContent() {
         } else {
           setVideo(data);
 
-          // JIT Audio Enrichment: If no audio tracks, try to fetch them from Netflix API
-          if ((!data.audioTracks || data.audioTracks.length === 0) && data.netflixId) {
-            console.log('JIT: Fetching audio tracks for Netflix ID:', data.netflixId);
-            fetch(`/api/netflix/episodes/${data.netflixId}`)
-              .then(res => res.json())
-              .then(enrichData => {
-                if (enrichData.audioTracks?.length > 0) {
-                  setVideo(prev => prev ? {
-                    ...prev,
-                    audioTracks: enrichData.audioTracks
-                  } : prev);
-                }
-              })
-              .catch(err => console.error('JIT Enrichment Error:', err));
-          }
-
-          // If it's a TV show, series, drama, or anime, fetch details for episode selection
+          // MovieBox Episode support pending discovery of detail endpoint
           if (data.type === 'tv' || data.type === 'series' || data.type === 'drama' || data.type === 'anime') {
             if (data.tmdbId) {
               setLoadingEpisodes(true);
@@ -88,26 +72,6 @@ function WatchContent() {
                 .then(res => res.json())
                 .then(tvData => setTvDetails(tvData))
                 .catch(err => console.error('Failed to fetch TMDB episodes', err))
-                .finally(() => setLoadingEpisodes(false));
-            } else if (data.netflixId) {
-              setLoadingEpisodes(true);
-              fetch(`/api/netflix/episodes/${data.netflixId}`)
-                .then(res => res.json())
-                .then(tvData => {
-                  setTvDetails(tvData);
-                  // Merge Netflix language tracks if they exist
-                  if (tvData.audioTracks || tvData.subtitles) {
-                    setVideo(prev => {
-                      if (!prev) return prev;
-                      return {
-                        ...prev,
-                        audioTracks: [...(prev.audioTracks || []), ...(tvData.audioTracks || [])],
-                        subtitles: [...(prev.subtitles || []), ...(tvData.subtitles || [])],
-                      };
-                    });
-                  }
-                })
-                .catch(err => console.error('Failed to fetch Netflix episodes', err))
                 .finally(() => setLoadingEpisodes(false));
             } else if (data.malId) {
               setLoadingEpisodes(true);
@@ -117,6 +81,7 @@ function WatchContent() {
                 .catch(err => console.error('Failed to fetch Anime episodes', err))
                 .finally(() => setLoadingEpisodes(false));
             }
+
 
             // Always fetch internal episodes as well
             fetch(`/api/videos/series/${id}`)

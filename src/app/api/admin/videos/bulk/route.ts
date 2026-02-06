@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// Deployment Pulse: Netflix Metadata Fetching v3
+// Deployment Pulse: MovieBox Metadata Fetching v1
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
@@ -61,40 +61,8 @@ export async function POST(req: Request) {
                     }
                 }
 
-                // Auto-fetch Netflix Details (Audio Tracks)
-                if (v.netflixId) {
-                    try {
-                        const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
-                        const detailsUrl = `https://netflix54.p.rapidapi.com/title/details/?ids=${v.netflixId}&lang=en`;
-                        const detailsRes = await fetch(detailsUrl, {
-                            headers: {
-                                'x-rapidapi-host': 'netflix54.p.rapidapi.com',
-                                'x-rapidapi-key': RAPIDAPI_KEY as string
-                            }
-                        });
-                        if (detailsRes.ok) {
-                            const detailsData = await detailsRes.json();
-                            const detail = detailsData[0];
-                            if (detail?.details) {
-                                // Netflix API can return audio in multiple formats
-                                const rawAudio = detail.details.audio || detail.details.audioTracks || [];
-                                const netflixAudio = rawAudio.map((a: any) => ({
-                                    language: a.language || a.name || a.text || 'Unknown',
-                                    url: '#' // Placeholder indicating mirror-side internal audio
-                                }));
+                // Netflix Enrichment logic removed as per user request (Switching to MovieBox)
 
-                                // Merge with existing tracks, avoiding duplicates by language
-                                const existingLangs = new Set((v.audioTracks || []).map((t: any) => t.language.toLowerCase()));
-                                const newTracks = netflixAudio.filter((t: any) => t.language && !existingLangs.has(t.language.toLowerCase()));
-                                v.audioTracks = [...(v.audioTracks || []), ...newTracks];
-
-                                console.log(`Enriched "${v.title}" with ${newTracks.length} Netflix audio tracks`);
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Netflix Extended Detail Error:', e);
-                    }
-                }
 
                 const result = await prisma.video.create({
                     data: {

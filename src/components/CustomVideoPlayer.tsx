@@ -368,17 +368,16 @@ export function CustomVideoPlayer({
       });
     }
 
-    // 7. Dedicated Netflix/Legacy Fallbacks
     if (netflixId) {
       servers.push({
-        name: 'Mirror 6 (Netflix Stream)',
+        name: 'Mirror 6 (Global Stream)',
         url: isTv
           ? `https://vidsrc.me/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
           : `https://vidsrc.me/embed/movie?netflix=${netflixId}`
       });
       // Also add vidsrc.xyz for netflix just in case
       servers.push({
-        name: 'Mirror 7 (Netflix Alt)',
+        name: 'Mirror 7 (Alt Stream)',
         url: isTv
           ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
           : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`

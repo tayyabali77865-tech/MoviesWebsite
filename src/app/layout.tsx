@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: 'Complet Stream — Watch Movies & TV Shows Online for Free',
-  description: 'Stream unlimited movies and TV shows with HD quality. Netflix-like streaming platform with custom player, multiple categories, and responsive design. Watch anytime, anywhere.',
-  keywords: 'movies, TV shows, streaming, watch online, free movies, Netflix alternative, video streaming, entertainment',
+  description: 'Stream unlimited movies and TV shows with HD quality. MovieBox-powered streaming platform with custom player, multiple categories, and responsive design. Watch anytime, anywhere.',
+  keywords: 'movies, TV shows, streaming, watch online, free movies, MovieBox, video streaming, entertainment',
   authors: [{ name: 'Complet Stream' }],
   openGraph: {
     title: 'Complet Stream — Watch Movies & TV Shows Online',
