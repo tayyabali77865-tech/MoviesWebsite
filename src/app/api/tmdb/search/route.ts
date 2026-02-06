@@ -16,6 +16,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query');
     const type = searchParams.get('type') || 'multi'; // movie, tv, or multi
+    const lang = searchParams.get('lang') || 'en-US';
 
     if (!query) {
         return NextResponse.json({ error: 'Query required' }, { status: 400 });
@@ -26,10 +27,10 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'TMDB API Key not configured' }, { status: 500 });
     }
 
-    console.log(`Searching TMDB (${type}) for:`, query);
+    console.log(`Searching TMDB (${type}) for:`, query, `in language:`, lang);
 
     try {
-        const url = `${TMDB_BASE_URL}/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1`;
+        const url = `${TMDB_BASE_URL}/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=${lang}&page=1`;
         const res = await fetch(url);
 
         if (!res.ok) {

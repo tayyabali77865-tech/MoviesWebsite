@@ -21,6 +21,7 @@ interface TMDBResult {
 export default function BulkMovieImport() {
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState<'movie' | 'tv' | 'multi'>('multi');
+    const [searchLang, setSearchLang] = useState('en-US');
     const [targetType, setTargetType] = useState<'movie' | 'series' | 'drama' | 'anime'>('movie');
     const [targetSection, setTargetSection] = useState<'new' | 'trending' | 'upcoming' | 'random'>('new');
     const [searching, setSearching] = useState(false);
@@ -39,7 +40,7 @@ export default function BulkMovieImport() {
         setSearching(true);
         setResults([]);
         try {
-            const res = await fetch(`/api/tmdb/search?query=${encodeURIComponent(query)}&type=${searchType}`);
+            const res = await fetch(`/api/tmdb/search?query=${encodeURIComponent(query)}&type=${searchType}&lang=${searchLang}`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Search failed');
             setResults(data.results || []);
@@ -145,9 +146,17 @@ export default function BulkMovieImport() {
                                     onChange={(e) => setSearchType(e.target.value as any)}
                                     className="bg-white/5 border border-white/10 rounded-2xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
                                 >
-                                    <option value="multi" className="bg-zinc-900">All</option>
-                                    <option value="movie" className="bg-zinc-900">Movies</option>
-                                    <option value="tv" className="bg-zinc-900">TV Shows</option>
+                                    <option value="multi" className="bg-zinc-900">All Types</option>
+                                    <option value="movie" className="bg-zinc-900">Movies Only</option>
+                                    <option value="tv" className="bg-zinc-900">TV Shows Only</option>
+                                </select>
+                                <select
+                                    value={searchLang}
+                                    onChange={(e) => setSearchLang(e.target.value)}
+                                    className="bg-white/5 border border-white/10 rounded-2xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                                >
+                                    <option value="en-US" className="bg-zinc-900">English Metadata</option>
+                                    <option value="hi-IN" className="bg-zinc-900">Hindi Metadata</option>
                                 </select>
                                 <button type="submit" className="hidden">Search</button>
                             </form>

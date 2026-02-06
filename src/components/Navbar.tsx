@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, X, User, LogOut, Film } from 'lucide-react';
@@ -13,10 +14,11 @@ const BLOG_URL = 'https://blogger.com';
 export function Navbar() {
   const { data: session, status } = useSession();
   const { toggleSidebar } = useUI();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<{ id: string; title: string; thumbnailUrl: string; category: string }[]>([]);
+  const [suggestions, setSuggestions] = useState<{ id: string; title: string; thumbnailUrl: string; category: string; type: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [debounce, setDebounce] = useState<NodeJS.Timeout | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -84,8 +86,18 @@ export function Navbar() {
         </div>
 
         <div className="flex-1 max-w-xl mx-4 relative hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (query.trim()) {
+                setSearchOpen(false);
+                setShowSuggestions(false);
+                router.push(`/results?q=${encodeURIComponent(query)}`);
+              }
+            }}
+            className="relative"
+          >
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
             <input
               type="search"
               placeholder="Search movies..."
@@ -96,34 +108,52 @@ export function Navbar() {
               }}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full bg-white/10 border border-white/20 rounded-full pl-10 pr-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white/5 transition-all"
             />
-          </div>
+          </form>
           <AnimatePresence>
             {showSuggestions && (query || suggestions.length > 0) && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="absolute top-full left-0 right-0 mt-1 bg-surface-700 rounded-lg shadow-xl border border-white/10 overflow-hidden max-h-80 overflow-y-auto"
+                className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] rounded-xl shadow-2xl border border-white/10 overflow-hidden max-h-[500px] overflow-y-auto z-[100] backdrop-blur-xl"
               >
                 {suggestions.length === 0 && query ? (
-                  <p className="p-4 text-gray-400">No results</p>
+                  <div className="p-4 flex items-center gap-3 text-gray-500 italic">
+                    <Search className="w-4 h-4" />
+                    <span>Search for "{query}"</span>
+                  </div>
                 ) : (
-                  suggestions.map((v) => (
-                    <Link
-                      key={v.id}
-                      href={`/watch/${v.id}`}
-                      className="flex items-center gap-3 p-3 hover:bg-white/10 transition-colors"
-                    >
-                      <img
-                        src={v.thumbnailUrl}
-                        alt=""
-                        className="w-12 h-8 object-cover rounded"
-                      />
-                      <span className="truncate">{v.title}</span>
-                    </Link>
-                  ))
+                  <div className="py-2">
+                    {suggestions.map((v) => (
+                      <Link
+                        key={v.id}
+                        href={`/watch/${v.id}`}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-all group"
+                      >
+                        <div className="w-12 h-8 rounded bg-white/5 overflow-hidden flex-shrink-0">
+                          <img
+                            src={v.thumbnailUrl}
+                            alt=""
+                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                          />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="truncate text-sm font-medium text-gray-200 group-hover:text-white">{v.title}</span>
+                          <span className="text-[10px] text-gray-500 uppercase tracking-tighter">{v.category || v.type}</span>
+                        </div>
+                      </Link>
+                    ))}
+                    {query && (
+                      <button
+                        onClick={() => router.push(`/results?q=${encodeURIComponent(query)}`)}
+                        className="w-full px-4 py-3 text-left text-xs font-bold text-red-500 hover:bg-white/5 border-t border-white/5 flex items-center gap-2"
+                      >
+                        <Search className="w-3 h-3" /> View all results
+                      </button>
+                    )}
+                  </div>
                 )}
               </motion.div>
             )}
@@ -201,8 +231,18 @@ export function Navbar() {
       </div>
 
       {searchOpen && (
-        <div className="md:hidden px-4 pt-2 pb-4">
-          <div className="relative">
+        <div className="md:hidden px-4 pt-2 pb-4 bg-black/50 backdrop-blur-xl border-b border-white/10">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (query.trim()) {
+                setSearchOpen(false);
+                setShowSuggestions(false);
+                router.push(`/results?q=${encodeURIComponent(query)}`);
+              }
+            }}
+            className="relative"
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="search"
@@ -213,27 +253,46 @@ export function Navbar() {
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-2.5 text-white"
+              className="w-full bg-white/10 border border-white/20 rounded-full pl-10 pr-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             />
-          </div>
+          </form>
           <AnimatePresence>
             {showSuggestions && suggestions.length > 0 && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="mt-1 bg-surface-700 rounded-lg overflow-hidden max-h-60 overflow-y-auto"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-2 bg-[#1a1a1a] rounded-xl overflow-hidden max-h-80 overflow-y-auto border border-white/10 shadow-2xl"
               >
                 {suggestions.map((v) => (
                   <Link
                     key={v.id}
                     href={`/watch/${v.id}`}
-                    className="flex items-center gap-3 p-3 hover:bg-white/10"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex items-center gap-3 p-3 hover:bg-white/10 transition-all border-b border-white/5 last:border-0"
                   >
-                    <img src={v.thumbnailUrl} alt="" className="w-12 h-8 object-cover rounded" />
-                    <span className="truncate">{v.title}</span>
+                    <div className="w-12 h-8 rounded overflow-hidden flex-shrink-0 bg-white/5">
+                      <img src={v.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="truncate text-sm text-gray-200">{v.title}</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-tighter">{v.category || v.type}</span>
+                    </div>
                   </Link>
                 ))}
+                <button
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setShowSuggestions(false);
+                    router.push(`/results?q=${encodeURIComponent(query)}`);
+                  }}
+                  className="w-full p-3 text-center text-xs font-bold text-red-500 bg-white/5"
+                >
+                  View all results
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
