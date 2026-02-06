@@ -273,16 +273,6 @@ export function CustomVideoPlayer({
       servers.push({ name: 'VidSrc.me (English)', url });
     }
 
-    // VidSrc.me with enhanced Hindi support
-    if (tmdbId) {
-      const url = isTv
-        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=en&dub=en`
-        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=en&dub=en`;
-      servers.push({ name: 'VidSrc.me (English)', url });
-        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
-      servers.push({ name: `VidSrc.me (${selectedLanguage.toUpperCase()})`, url });
-    }
-
     return servers;
   };
 
@@ -458,7 +448,7 @@ export function CustomVideoPlayer({
             {/* Enhanced Hindi Language Note for Embeds */}
             {!currentSrc && (
               <div className="absolute bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 bg-gradient-to-r from-red-600/90 to-orange-600/90 backdrop-blur-md rounded-full border border-red-500/50 text-[11px] text-white font-bold z-50 shadow-xl animate-pulse">
-                🎬 <b>{selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage.toUpperCase()} Audio</b> - If still English, use player settings (⚙️) to select {selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage.toUpperCase()} audio track
+                🎬 English Audio - If still Hindi, use player settings (⚙️) to select Hindi audio track
               </div>
             )}
           </>
@@ -466,5 +456,7 @@ export function CustomVideoPlayer({
       </div>
     </div>
   </div>
+</div>
+</div>
 </div>
 </>
