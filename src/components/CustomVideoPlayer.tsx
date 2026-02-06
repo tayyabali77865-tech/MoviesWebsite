@@ -8,6 +8,15 @@ import {
   X,
   Smartphone,
   Loader2,
+  Settings,
+  Languages,
+  ChevronDown,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -76,6 +85,13 @@ export function CustomVideoPlayer({
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
   const [currentServer, setCurrentServer] = useState(0);
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('hi');
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [currentSeason, setCurrentSeason] = useState(season);
+  const [currentEpisode, setCurrentEpisode] = useState(episode);
 
   const currentSrc = hlsUrl || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
   const isDailymotion = currentSrc && currentSrc.includes('dailymotion.com');
@@ -196,29 +212,36 @@ export function CustomVideoPlayer({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Enhanced server list with multiple Hindi language parameters
+  // Enhanced server list with dynamic language support
   const getEmbedServers = () => {
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // VidSrc XYZ with enhanced Hindi parameters
+    // VidSrc XYZ with dynamic language parameters
     let xyzUrl = '';
     if (tmdbId) {
       xyzUrl = isTv
-        ? `https://vidsrc.xyz/embed/tv/${tmdbId}/${season}/${episode}`
+        ? `https://vidsrc.xyz/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}`
         : `https://vidsrc.xyz/embed/movie/${tmdbId}`;
     } else if (netflixId) {
       xyzUrl = isTv
-        ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${season}&e=${episode}`
+        ? `https://vidsrc.xyz/embed/tv?netflix=${netflixId}&s=${currentSeason}&e=${currentEpisode}`
         : `https://vidsrc.xyz/embed/movie?netflix=${netflixId}`;
     } else if (malId) {
-      xyzUrl = `https://vidsrc.xyz/embed/anime/${malId}/${episode}`;
+      xyzUrl = `https://vidsrc.xyz/embed/anime/${malId}/${currentEpisode}`;
     }
 
     if (xyzUrl) {
+      // Dynamic language parameters based on selection
+      const langParams = selectedLanguage === 'hi' 
+        ? '?ds_lang=hi&lang=hi&subs=hi&audio=hi&cc=hi'
+        : selectedLanguage === 'en'
+        ? '?ds_lang=en&lang=en&subs=en&audio=en&cc=en'
+        : `?ds_lang=${selectedLanguage}&lang=${selectedLanguage}`;
+      
       servers.push({
-        name: 'Server 1 (Hindi Dub)',
-        url: `${xyzUrl}?ds_lang=hi&lang=hi&subs=hi&audio=hi&cc=hi`
+        name: `Server 1 (${selectedLanguage === 'hi' ? 'Hindi Dub' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()})`,
+        url: `${xyzUrl}${langParams}`
       });
       servers.push({
         name: 'Server 2 (Global HD)',
@@ -226,28 +249,28 @@ export function CustomVideoPlayer({
       });
     }
 
-    // VidSrc.to with Hindi support
+    // VidSrc.to with language support
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}?lang=hi`
-        : `https://vidsrc.to/embed/movie/${tmdbId}?lang=hi`;
-      servers.push({ name: 'Server 3 (Cloud VIP)', url });
+        ? `https://vidsrc.to/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?lang=${selectedLanguage}`
+        : `https://vidsrc.to/embed/movie/${tmdbId}?lang=${selectedLanguage}`;
+      servers.push({ name: `Server 3 (${selectedLanguage.toUpperCase()} VIP)`, url });
     }
 
-    // VidSrc.me with Hindi support
+    // VidSrc.me with language support
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${season}&e=${episode}&lang=hi`
-        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=hi`;
-      servers.push({ name: 'Server 4 (Legacy)', url });
+        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=${selectedLanguage}`
+        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=${selectedLanguage}`;
+      servers.push({ name: `Server 4 (${selectedLanguage.toUpperCase()} Legacy)`, url });
     }
 
-    // Additional Hindi-optimized servers
+    // Additional language-optimized servers
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${season}/${episode}?ds_lang=hi`
-        : `https://vidsrc.pro/embed/movie/${tmdbId}?ds_lang=hi`;
-      servers.push({ name: 'Server 5 (Hindi Pro)', url });
+        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?ds_lang=${selectedLanguage}`
+        : `https://vidsrc.pro/embed/movie/${tmdbId}?ds_lang=${selectedLanguage}`;
+      servers.push({ name: `Server 5 (${selectedLanguage.toUpperCase()} Pro)`, url });
     }
 
     return servers;
@@ -374,9 +397,95 @@ export function CustomVideoPlayer({
               )}
             </AnimatePresence>
 
+            {/* Language Selection Menu */}
+            {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
+              <div className="absolute top-20 right-4 z-[60]">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                    className="flex items-center gap-2 px-4 py-2 bg-black/80 backdrop-blur-md rounded-lg border border-white/20 text-white hover:bg-white/10 transition-all"
+                  >
+                    <Languages className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()}
+                    </span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showLanguageMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        className="absolute top-full right-0 mt-2 w-48 bg-black/95 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden shadow-2xl z-[70]"
+                      >
+                        <button
+                          onClick={() => {
+                            setSelectedLanguage('hi');
+                            setShowLanguageMenu(false);
+                            setIframeLoading(true);
+                          }}
+                          className={clsx(
+                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
+                            selectedLanguage === 'hi' && "bg-red-600/20 text-red-400"
+                          )}
+                        >
+                          <span>🇮🇳</span>
+                          <span>हिंदी (Hindi)</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedLanguage('en');
+                            setShowLanguageMenu(false);
+                            setIframeLoading(true);
+                          }}
+                          className={clsx(
+                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
+                            selectedLanguage === 'en' && "bg-blue-600/20 text-blue-400"
+                          )}
+                        >
+                          <span>🇺🇸</span>
+                          <span>English</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedLanguage('es');
+                            setShowLanguageMenu(false);
+                            setIframeLoading(true);
+                          }}
+                          className={clsx(
+                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
+                            selectedLanguage === 'es' && "bg-yellow-600/20 text-yellow-400"
+                          )}
+                        >
+                          <span>🇪🇸</span>
+                          <span>Español</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedLanguage('fr');
+                            setShowLanguageMenu(false);
+                            setIframeLoading(true);
+                          }}
+                          className={clsx(
+                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
+                            selectedLanguage === 'fr' && "bg-purple-600/20 text-purple-400"
+                          )}
+                        >
+                          <span>🇫🇷</span>
+                          <span>Français</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+
             {/* Server Switcher for Embeds */}
             {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
-              <div className="absolute top-20 left-4 flex flex-wrap gap-2 z-[60]">
+              <div className="absolute top-32 left-4 flex flex-wrap gap-2 z-[60]">
                 {embedServers.map((server, idx) => (
                   <button
                     key={idx}
@@ -422,10 +531,57 @@ export function CustomVideoPlayer({
               </div>
             </div>
 
+            {/* Season/Episode Bar - Only for TV/Series */}
+            {(type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && (
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 to-transparent p-4 z-[50]">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
+                    <span className="text-xs text-gray-400 font-medium">Season</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={currentSeason}
+                      onChange={(e) => {
+                        const newSeason = parseInt(e.target.value) || 1;
+                        setCurrentSeason(newSeason);
+                        setIframeLoading(true);
+                      }}
+                      className="w-16 bg-transparent text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-1"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
+                    <span className="text-xs text-gray-400 font-medium">Episode</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={currentEpisode}
+                      onChange={(e) => {
+                        const newEpisode = parseInt(e.target.value) || 1;
+                        setCurrentEpisode(newEpisode);
+                        setIframeLoading(true);
+                      }}
+                      className="w-16 bg-transparent text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-1"
+                    />
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      setCurrentEpisode(currentEpisode + 1);
+                      setIframeLoading(true);
+                    }}
+                    className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-colors"
+                  >
+                    Next Episode →
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Enhanced Hindi Language Note for Embeds */}
             {!currentSrc && (
-              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 px-6 py-3 bg-gradient-to-r from-red-600/90 to-orange-600/90 backdrop-blur-md rounded-full border border-red-500/50 text-[11px] text-white font-bold z-50 shadow-xl animate-pulse">
-                🎬 <b>Hindi Dubbed Movies</b> - Use player settings (⚙️) to select Hindi audio if available
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 bg-gradient-to-r from-red-600/90 to-orange-600/90 backdrop-blur-md rounded-full border border-red-500/50 text-[11px] text-white font-bold z-50 shadow-xl animate-pulse">
+                🎬 <b>{selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage.toUpperCase()} Movies</b> - Language changed successfully!
               </div>
             )}
           </>
