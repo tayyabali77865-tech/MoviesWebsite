@@ -286,14 +286,6 @@ export function CustomVideoPlayer({
       servers.push({ name: `Server 5 (${selectedLanguage.toUpperCase()} Legacy)`, url });
     }
 
-    // Additional Hindi-optimized servers
-    if (tmdbId && selectedLanguage === 'hi') {
-      const url = isTv
-        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?ds_lang=hi&hindi=1&dub=hi&audio=hi`
-        : `https://vidsrc.pro/embed/movie/${tmdbId}?ds_lang=hi&hindi=1&dub=hi&audio=hi`;
-      servers.push({ name: 'Server 6 (Hindi Pro)', url });
-    }
-
     return servers;
   };
 
@@ -334,10 +326,7 @@ export function CustomVideoPlayer({
         ) : (
           <>
             {/* Background Media Container */}
-            <div className={clsx(
-              "absolute inset-0 w-full h-full",
-              (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "pb-20"
-            )}>
+            <div className="absolute inset-0 w-full h-full">
               {currentSrc && !currentSrc.includes('dailymotion.com') ? (
                 <video
                   ref={videoRef}
@@ -368,10 +357,7 @@ export function CustomVideoPlayer({
                   />
                 </div>
               ) : (tmdbId || malId || netflixId || anilistId) ? (
-                <div className={clsx(
-                  "relative w-full h-full bg-black",
-                  (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "pb-20"
-                )}>
+                <div className="relative w-full h-full bg-black">
                   {iframeLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-[40]">
                       <Loader2 className="w-12 h-12 animate-spin text-red-600 mb-4" />
@@ -382,9 +368,12 @@ export function CustomVideoPlayer({
                   <iframe
                     src={embedUrl}
                     className={clsx(
-                      "w-full h-full border-0 relative z-[30]",
-                      (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "h-[calc(100%-5rem)]"
+                      "w-full border-0 relative z-[30]",
+                      (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "h-[calc(100%-6rem)]"
                     )}
+                    style={{
+                      height: (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') ? 'calc(100% - 6rem)' : '100%'
+                    }}
                     referrerPolicy="origin"
                     allowFullScreen
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -563,8 +552,8 @@ export function CustomVideoPlayer({
 
             {/* Season/Episode Bar - Only for TV/Series */}
             {(type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && (
-              <div className="absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md p-4 z-[50] border-t border-white/10">
-                <div className="flex items-center justify-center gap-4">
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-md z-[50] border-t border-white/10">
+                <div className="flex items-center justify-center gap-4 h-full px-4">
                   <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
                     <span className="text-xs text-gray-400 font-medium">Season</span>
                     <input
