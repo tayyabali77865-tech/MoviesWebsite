@@ -65,7 +65,7 @@ export async function GET(req: Request) {
         const items = data.data?.items || [];
 
         // Map data to consistent format
-        const results = items.map((item: any) => ({
+        let results = items.map((item: any) => ({
             id: item.subjectId,
             title: item.title,
             overview: item.description || item.postTitle || 'No description available',
@@ -74,7 +74,28 @@ export async function GET(req: Request) {
             release_year: item.releaseDate ? item.releaseDate.split('-')[0] : null
         }));
 
-        return NextResponse.json({ results });
+        // --- IMPROVED ACCURACY ALGORITHM ---
+        if (query.trim()) {
+            const q = query.toLowerCase().trim();
+            results = results.map((res: any) => {
+                let score = 0;
+                const title = res.title.toLowerCase();
+
+                if (title === q) score += 100;
+                else if (title.startsWith(q)) score += 50;
+                else if (title.includes(q)) score += 20;
+
+                // Also check description for hidden matches
+                const overview = res.overview.toLowerCase();
+                if (overview.includes(q)) score += 5;
+
+                return { ...res, score };
+            }).filter((res: any) => res.score > 0) // Remove totally irrelevant items
+                .sort((a: any, b: any) => b.score - a.score); // Sort by highest relevance
+        }
+        // ------------------------------------
+
+        return NextResponse.json({ results: results.map(({ score, ...rest }: any) => rest) });
     } catch (error: any) {
         console.error('MovieBox Search Error:', error);
         return NextResponse.json({ error: error.message || 'Failed to fetch titles from MovieBox API' }, { status: 500 });
