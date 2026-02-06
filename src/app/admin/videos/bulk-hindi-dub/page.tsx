@@ -42,10 +42,6 @@ export default function BulkHindiDubImport() {
             if (!res.ok) throw new Error(data.error || 'Search failed');
 
             setResults(data.results || []);
-
-            if (data.fallback) {
-                toast('Using TMDB fallback - Hindi content may be limited', { icon: '⚠️' });
-            }
         } catch (error) {
             console.error(error);
             toast.error(error instanceof Error ? error.message : 'Search failed');
@@ -135,8 +131,8 @@ export default function BulkHindiDubImport() {
                             <button
                                 onClick={() => { setContentType('movie'); setResults([]); }}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${contentType === 'movie'
-                                        ? 'bg-green-600 text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white'
+                                    ? 'bg-green-600 text-white shadow-lg'
+                                    : 'text-gray-400 hover:text-white'
                                     }`}
                             >
                                 Movies
@@ -144,8 +140,8 @@ export default function BulkHindiDubImport() {
                             <button
                                 onClick={() => { setContentType('series'); setResults([]); }}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${contentType === 'series'
-                                        ? 'bg-green-600 text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white'
+                                    ? 'bg-green-600 text-white shadow-lg'
+                                    : 'text-gray-400 hover:text-white'
                                     }`}
                             >
                                 Series
