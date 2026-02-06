@@ -79,11 +79,11 @@ export async function GET(req: Request) {
             const q = query.toLowerCase().trim();
             results = results.map((res: any) => {
                 let score = 0;
-                const title = res.title.toLowerCase();
+                const title = (res.title || "").toLowerCase();
 
                 if (title === q) score += 100;
-                else if (title.startsWith(q)) score += 50;
-                else if (title.includes(q)) score += 20;
+                else if (title && title.startsWith(q)) score += 50;
+                else if (title && title.includes(q)) score += 20;
 
                 // Also check description for hidden matches
                 const overview = res.overview.toLowerCase();

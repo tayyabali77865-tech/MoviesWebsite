@@ -36,6 +36,14 @@ export function AdsterraAd({ position = 'default', className = '' }: AdsterraAdP
 
             document.body.appendChild(script);
         }
+
+        // Cleanup: Remove the script when the component unmounts to avoid leakage in SPA navigation
+        return () => {
+            const script = document.getElementById(scriptId);
+            if (script) {
+                script.remove();
+            }
+        };
     }, []);
 
     return (
