@@ -33,8 +33,12 @@ export async function GET(req: Request) {
         });
 
         if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || 'Netflix API error');
+            const errorData = await res.json().catch(() => ({}));
+            console.error('Netflix API Error Status:', res.status, errorData);
+            if (res.status === 429) {
+                return NextResponse.json({ error: 'Netflix API Quota Exceeded. Please upgrade your RapidAPI plan.' }, { status: 429 });
+            }
+            throw new Error(errorData.message || `Netflix API error: ${res.status}`);
         }
 
         const data = await res.json();
@@ -50,8 +54,8 @@ export async function GET(req: Request) {
         }));
 
         return NextResponse.json({ results });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Netflix Search Error:', error);
-        return NextResponse.json({ error: 'Failed to fetch titles from Netflix API' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to fetch titles from Netflix API' }, { status: 500 });
     }
 }

@@ -565,12 +565,12 @@ export function CustomVideoPlayer({
                   exit={{ opacity: 0 }}
                   className={clsx(
                     "absolute inset-0 flex flex-col z-50 transition-all duration-300",
-                    isDailymotion ? "pointer-events-none" : "",
+                    (isDailymotion || !currentSrc) ? "pointer-events-none" : "",
                     currentSrc && !isDailymotion ? "bg-gradient-to-t from-black/95 via-transparent to-black/70" : "bg-transparent"
                   )}
                 >
                   {/* Top Bar */}
-                  <div className={clsx("flex items-center justify-between p-4", isDailymotion && "pointer-events-auto bg-gradient-to-b from-black/80 to-transparent")}>
+                  <div className={clsx("flex items-center justify-between p-4", (isDailymotion || !currentSrc) && "pointer-events-auto bg-gradient-to-b from-black/80 to-transparent")}>
                     {onClose && (
                       <button
                         type="button"
@@ -614,7 +614,7 @@ export function CustomVideoPlayer({
 
                   {/* Bottom Controls */}
                   {/* Bottom Controls */}
-                  <div className={clsx("p-4 space-y-4", isDailymotion && "hidden")}>
+                  <div className={clsx("p-4 space-y-4", isDailymotion && "hidden", !currentSrc && "bg-transparent")}>
                     {/* Progress Bar - Only for direct sources */}
                     {currentSrc && (
                       <div
@@ -694,27 +694,10 @@ export function CustomVideoPlayer({
                             </span>
                           </>
                         )}
-                        {!currentSrc && (
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={togglePlay}
-                              className="p-1 hover:text-red-500 transition-colors"
-                            >
-                              {playing ? <Pause className="w-6 h-6 fill-currentColor" /> : <Play className="w-6 h-6 fill-currentColor" />}
-                            </button>
-                            <span className="text-sm font-medium tabular-nums text-white/90">
-                              {formatTime(currentTime)}
-                              <span className="ml-2 text-[10px] text-gray-500 font-normal uppercase tracking-tighter">(Elapsed)</span>
-                            </span>
-                            <span className="text-[10px] text-white/40 italic flex items-center gap-2">
-                              Use mirror player for seeking.
-                            </span>
-                          </div>
-                        )}
+                        {!currentSrc && <div className="flex-1" />}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className={clsx("flex items-center gap-2", !currentSrc && "pointer-events-auto")}>
                         <div className="relative">
                           <button
                             type="button"
