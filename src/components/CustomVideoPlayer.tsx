@@ -217,7 +217,7 @@ export function CustomVideoPlayer({
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // VidSrc XYZ with dynamic language parameters
+    // VidSrc XYZ with enhanced Hindi parameters
     let xyzUrl = '';
     if (tmdbId) {
       xyzUrl = isTv
@@ -232,45 +232,66 @@ export function CustomVideoPlayer({
     }
 
     if (xyzUrl) {
-      // Dynamic language parameters based on selection
-      const langParams = selectedLanguage === 'hi' 
-        ? '?ds_lang=hi&lang=hi&subs=hi&audio=hi&cc=hi'
-        : selectedLanguage === 'en'
-        ? '?ds_lang=en&lang=en&subs=en&audio=en&cc=en'
-        : `?ds_lang=${selectedLanguage}&lang=${selectedLanguage}`;
+      // Enhanced Hindi parameters for better Hindi audio
+      const hindiParams = '?ds_lang=hi&lang=hi&subs=hi&audio=hi&cc=hi&dub=hi&hindi=hi&audio_lang=hi&sub_lang=hi';
+      const englishParams = '?ds_lang=en&lang=en&subs=en&audio=en&cc=en';
+      const spanishParams = '?ds_lang=es&lang=es&subs=es&audio=es&cc=es';
+      const frenchParams = '?ds_lang=fr&lang=fr&subs=fr&audio=fr&cc=fr';
+      
+      let langParams;
+      if (selectedLanguage === 'hi') {
+        langParams = hindiParams;
+      } else if (selectedLanguage === 'en') {
+        langParams = englishParams;
+      } else if (selectedLanguage === 'es') {
+        langParams = spanishParams;
+      } else if (selectedLanguage === 'fr') {
+        langParams = frenchParams;
+      } else {
+        langParams = `?ds_lang=${selectedLanguage}&lang=${selectedLanguage}`;
+      }
       
       servers.push({
         name: `Server 1 (${selectedLanguage === 'hi' ? 'Hindi Dub' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()})`,
         url: `${xyzUrl}${langParams}`
       });
+      
+      // Add alternative Hindi server with different parameters
+      if (selectedLanguage === 'hi') {
+        servers.push({
+          name: 'Server 2 (Hindi Alt)',
+          url: `${xyzUrl}?hindi=1&dub=hi&audio=hi&lang=hi&ds_lang=hi&subs=hi`
+        });
+      }
+      
       servers.push({
-        name: 'Server 2 (Global HD)',
+        name: 'Server 3 (Global HD)',
         url: xyzUrl
       });
     }
 
-    // VidSrc.to with language support
+    // VidSrc.to with enhanced Hindi support
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.to/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?lang=${selectedLanguage}`
-        : `https://vidsrc.to/embed/movie/${tmdbId}?lang=${selectedLanguage}`;
-      servers.push({ name: `Server 3 (${selectedLanguage.toUpperCase()} VIP)`, url });
+        ? `https://vidsrc.to/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`
+        : `https://vidsrc.to/embed/movie/${tmdbId}?lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
+      servers.push({ name: `Server 4 (${selectedLanguage.toUpperCase()} VIP)`, url });
     }
 
-    // VidSrc.me with language support
+    // VidSrc.me with enhanced Hindi support
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=${selectedLanguage}`
-        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=${selectedLanguage}`;
-      servers.push({ name: `Server 4 (${selectedLanguage.toUpperCase()} Legacy)`, url });
+        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`
+        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
+      servers.push({ name: `Server 5 (${selectedLanguage.toUpperCase()} Legacy)`, url });
     }
 
-    // Additional language-optimized servers
-    if (tmdbId) {
+    // Additional Hindi-optimized servers
+    if (tmdbId && selectedLanguage === 'hi') {
       const url = isTv
-        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?ds_lang=${selectedLanguage}`
-        : `https://vidsrc.pro/embed/movie/${tmdbId}?ds_lang=${selectedLanguage}`;
-      servers.push({ name: `Server 5 (${selectedLanguage.toUpperCase()} Pro)`, url });
+        ? `https://vidsrc.pro/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?ds_lang=hi&hindi=1&dub=hi&audio=hi`
+        : `https://vidsrc.pro/embed/movie/${tmdbId}?ds_lang=hi&hindi=1&dub=hi&audio=hi`;
+      servers.push({ name: 'Server 6 (Hindi Pro)', url });
     }
 
     return servers;
@@ -313,7 +334,10 @@ export function CustomVideoPlayer({
         ) : (
           <>
             {/* Background Media Container */}
-            <div className="absolute inset-0 w-full h-full">
+            <div className={clsx(
+              "absolute inset-0 w-full h-full",
+              (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "pb-20"
+            )}>
               {currentSrc && !currentSrc.includes('dailymotion.com') ? (
                 <video
                   ref={videoRef}
@@ -344,7 +368,10 @@ export function CustomVideoPlayer({
                   />
                 </div>
               ) : (tmdbId || malId || netflixId || anilistId) ? (
-                <div className="relative w-full h-full bg-black">
+                <div className={clsx(
+                  "relative w-full h-full bg-black",
+                  (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "pb-20"
+                )}>
                   {iframeLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-[40]">
                       <Loader2 className="w-12 h-12 animate-spin text-red-600 mb-4" />
@@ -354,7 +381,10 @@ export function CustomVideoPlayer({
                   )}
                   <iframe
                     src={embedUrl}
-                    className="w-full h-full border-0 relative z-[30]"
+                    className={clsx(
+                      "w-full h-full border-0 relative z-[30]",
+                      (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "h-[calc(100%-5rem)]"
+                    )}
                     referrerPolicy="origin"
                     allowFullScreen
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -533,8 +563,8 @@ export function CustomVideoPlayer({
 
             {/* Season/Episode Bar - Only for TV/Series */}
             {(type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 to-transparent p-4 z-[50]">
-                <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md p-4 z-[50] border-t border-white/10">
+                <div className="flex items-center justify-center gap-4">
                   <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
                     <span className="text-xs text-gray-400 font-medium">Season</span>
                     <input
@@ -580,8 +610,8 @@ export function CustomVideoPlayer({
 
             {/* Enhanced Hindi Language Note for Embeds */}
             {!currentSrc && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 bg-gradient-to-r from-red-600/90 to-orange-600/90 backdrop-blur-md rounded-full border border-red-500/50 text-[11px] text-white font-bold z-50 shadow-xl animate-pulse">
-                🎬 <b>{selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage.toUpperCase()} Movies</b> - Language changed successfully!
+              <div className="absolute bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 bg-gradient-to-r from-red-600/90 to-orange-600/90 backdrop-blur-md rounded-full border border-red-500/50 text-[11px] text-white font-bold z-50 shadow-xl animate-pulse">
+                🎬 <b>{selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage.toUpperCase()} Audio</b> - If still English, use player settings (⚙️) to select {selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage.toUpperCase()} audio track
               </div>
             )}
           </>
