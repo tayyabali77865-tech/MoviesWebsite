@@ -17,16 +17,15 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get('query');
+    const query = searchParams.get('query') || '';
     const type = searchParams.get('type') || 'movie'; // movie, tv, anime, manga, documentry
 
-    if (!query) {
-        return NextResponse.json({ error: 'Query required' }, { status: 400 });
-    }
-
     try {
-        // Updated to use MovieBox API with dynamic category
-        const url = `${MOVIEBOX_BASE_URL}/movie-or-tv/list?keyword=${encodeURIComponent(query)}&category=${encodeURIComponent(type)}`;
+        // Updated: If no query, we just list the latest items for that category (Discovery Mode)
+        let url = `${MOVIEBOX_BASE_URL}/movie-or-tv/list?category=${encodeURIComponent(type)}`;
+        if (query.trim()) {
+            url += `&keyword=${encodeURIComponent(query)}`;
+        }
 
         console.log('Fetching MovieBox:', url);
 

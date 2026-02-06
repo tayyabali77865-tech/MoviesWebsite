@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Search, Plus, Loader2, Check, Film, Settings, Languages, Music, Tv } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -30,23 +30,29 @@ export default function BulkMovieBoxImport() {
 
     const router = useRouter();
 
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+    const fetchResults = useCallback(async (q: string, type: string) => {
         setSearching(true);
-        setResults([]);
         try {
-            // Updated Endpoint: internally uses MovieBox now
-            const res = await fetch(`/api/admin/moviebox/search?query=${encodeURIComponent(query)}&type=${searchType}`);
+            const res = await fetch(`/api/admin/moviebox/search?query=${encodeURIComponent(q)}&type=${type}`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Search failed');
             setResults(data.results || []);
         } catch (error) {
             console.error(error);
-            toast.error(error instanceof Error ? error.message : 'Search failed');
+            toast.error(error instanceof Error ? error.message : 'Fetch failed');
         } finally {
             setSearching(false);
         }
+    }, []);
+
+    // Fetch latest on tab click or load
+    useEffect(() => {
+        fetchResults(query, searchType);
+    }, [searchType, fetchResults]);
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        fetchResults(query, searchType);
     };
 
     const toggleSelect = (item: MovieBoxResult) => {
