@@ -7,6 +7,8 @@ const MOVIEBOX_BASE_URL = 'https://moviebox-api.p.rapidapi.com';
 
 if (!RAPIDAPI_KEY) {
     console.error('RAPIDAPI_KEY is not defined in environment variables');
+} else {
+    console.log('MovieBox Search: Using API Key starting with:', RAPIDAPI_KEY.substring(0, 5));
 }
 
 export async function GET(req: Request) {
