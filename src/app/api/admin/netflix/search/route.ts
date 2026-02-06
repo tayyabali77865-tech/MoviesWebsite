@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
-const NETFLIX_BASE_URL = 'https://netflix54.p.rapidapi.com';
+const MOVIEBOX_BASE_URL = 'https://moviebox-api.p.rapidapi.com';
 
 if (!RAPIDAPI_KEY) {
     console.error('RAPIDAPI_KEY is not defined in environment variables');
@@ -24,38 +24,45 @@ export async function GET(req: Request) {
     }
 
     try {
-        const url = `${NETFLIX_BASE_URL}/search/?query=${encodeURIComponent(query)}&offset=0&limit_titles=20&limit_suggestions=5&lang=en`;
+        // Updated to use MovieBox API
+        const url = `${MOVIEBOX_BASE_URL}/movie-or-tv/list?keyword=${encodeURIComponent(query)}&category=movie`;
+
+        console.log('Fetching MovieBox:', url);
+
         const res = await fetch(url, {
             headers: {
-                'x-rapidapi-host': 'netflix54.p.rapidapi.com',
+                'x-rapidapi-host': 'moviebox-api.p.rapidapi.com',
                 'x-rapidapi-key': RAPIDAPI_KEY as string
             }
         });
 
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
-            console.error('Netflix API Error Status:', res.status, errorData);
+            console.error('MovieBox API Error Status:', res.status, errorData);
             if (res.status === 429) {
-                return NextResponse.json({ error: 'Netflix API Quota Exceeded. Please upgrade your RapidAPI plan.' }, { status: 429 });
+                return NextResponse.json({ error: 'MovieBox API Quota Exceeded. Please upgrade your RapidAPI plan.' }, { status: 429 });
             }
-            throw new Error(errorData.message || `Netflix API error: ${res.status}`);
+            throw new Error(errorData.message || `MovieBox API error: ${res.status}`);
         }
 
         const data = await res.json();
 
-        // Map data to a consistent format
-        const results = (data.titles || []).map((item: any) => ({
-            id: item.jawSummary.id,
-            title: item.jawSummary.title,
-            overview: item.jawSummary.synopsis,
-            poster_path: item.jawSummary.backgroundImage?.url || null,
-            type: item.jawSummary.type, // 'movie' or 'series'
-            release_year: item.jawSummary.releaseYear
+        // MovieBox structure: { data: { items: [...] } }
+        const items = data.data?.items || [];
+
+        // Map data to consistent format
+        const results = items.map((item: any) => ({
+            id: item.subjectId,
+            title: item.title,
+            overview: item.description || item.postTitle || 'No description available',
+            poster_path: item.cover?.url || null,
+            type: 'movie', // forcing movie since we queried category=movie
+            release_year: item.releaseDate ? item.releaseDate.split('-')[0] : null
         }));
 
         return NextResponse.json({ results });
     } catch (error: any) {
-        console.error('Netflix Search Error:', error);
-        return NextResponse.json({ error: error.message || 'Failed to fetch titles from Netflix API' }, { status: 500 });
+        console.error('MovieBox Search Error:', error);
+        return NextResponse.json({ error: error.message || 'Failed to fetch titles from MovieBox API' }, { status: 500 });
     }
 }
