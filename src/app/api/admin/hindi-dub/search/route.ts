@@ -125,6 +125,91 @@ const POPULAR_HINDI_DUBBED_MOVIES = [
     { title: "Indiana Jones and the Kingdom of the Crystal Skull", year: 2008, tmdbId: 218 },
 ];
 
+// List of popular anime series known to have Hindi dubs
+const POPULAR_HINDI_DUBBED_ANIME = [
+    { title: "Naruto", year: 2002, tmdbId: 31910 },
+    { title: "One Piece", year: 1999, tmdbId: 37854 },
+    { title: "Dragon Ball Z", year: 1989, tmdbId: 12993 },
+    { title: "Attack on Titan", year: 2013, tmdbId: 1429 },
+    { title: "Death Note", year: 2006, tmdbId: 299336 },
+    { title: "My Hero Academia", year: 2016, tmdbId: 71912 },
+    { title: "Demon Slayer", year: 2019, tmdbId: 85247 },
+    { title: "Jujutsu Kaisen", year: 2020, tmdbId: 94557 },
+    { title: "Tokyo Ghoul", year: 2014, tmdbId: 61889 },
+    { title: "Black Clover", year: 2017, tmdbId: 74611 },
+    { title: "Boruto", year: 2017, tmdbId: 76000 },
+    { title: "Hunter x Hunter", year: 2011, tmdbId: 65648 },
+    { title: "Fullmetal Alchemist", year: 2003, tmdbId: 46261 },
+    { title: "One-Punch Man", year: 2015, tmdbId: 63926 },
+    { title: "Mob Psycho 100", year: 2016, tmdbId: 69050 },
+    { title: "Steins;Gate", year: 2011, tmdbId: 49049 },
+    { title: "Re:Zero", year: 2016, tmdbId: 68443 },
+    { title: "Sword Art Online", year: 2012, tmdbId: 19405 },
+    { title: "Fairy Tail", year: 2009, tmdbId: 45615 },
+    { title: "Blue Exorcist", year: 2011, tmdbId: 71733 },
+    { title: "The Promised Neverland", year: 2019, tmdbId: 86831 },
+    { title: "Vinland Saga", year: 2019, tmdbId: 93766 },
+    { title: "Mushoku Tensei", year: 2021, tmdbId: 110397 },
+    { title: "Overlord", year: 2015, tmdbId: 1402 },
+    { title: "Log Horizon", year: 2013, tmdbId: 60735 },
+    { title: "No Game No Life", year: 2014, tmdbId: 74984 },
+    { title: "Sword Gai Online", year: 2012, tmdbId: 156585 },
+    { title: "That Time I Got Reincarnated as a Slime", year: 2018, tmdbId: 82578 },
+    { title: "Rising of the Shield Hero", year: 2019, tmdbId: 82578 },
+    { title: "Konosuba", year: 2016, tmdbId: 69960 },
+    { title: "Reincarnated as a Sword", year: 2018, tmdbId: 82578 },
+    { title: "The Misfit of Demon King Academy", year: 2020, tmdbId: 110397 },
+];
+
+// List of popular Hollywood series known to have Hindi dubs
+const POPULAR_HINDI_DUBBED_SERIES = [
+    { title: "Breaking Bad", year: 2008, tmdbId: 1396 },
+    { title: "Game of Thrones", year: 2011, tmdbId: 1399 },
+    { title: "Stranger Things", year: 2016, tmdbId: 66732 },
+    { title: "The Walking Dead", year: 2010, tmdbId: 1402 },
+    { title: "Friends", year: 1994, tmdbId: 1668 },
+    { title: "The Office", year: 2005, tmdbId: 2285 },
+    { title: "How I Met Your Mother", year: 2005, tmdbId: 2286 },
+    { title: "The Big Bang Theory", year: 2007, tmdbId: 1418 },
+    { title: "Two and a Half Men", year: 2003, tmdbId: 2287 },
+    { title: "Modern Family", year: 2009, tmdbId: 2288 },
+    { title: "Grey's Anatomy", year: 2005, tmdbId: 2289 },
+    { title: "House", year: 2004, tmdbId: 1408 },
+    { title: "Prison Break", year: 2005, tmdbId: 2290 },
+    { title: "Lost", year: 2004, tmdbId: 2291 },
+    { title: "24", year: 2001, tmdbId: 2292 },
+    { title: "The Simpsons", year: 1989, tmdbId: 456 },
+    { title: "South Park", year: 1997, tmdbId: 2293 },
+    { title: "Family Guy", year: 1999, tmdbId: 2294 },
+    { title: "American Dad", year: 2005, tmdbId: 2295 },
+    { title: "The Flash", year: 2014, tmdbId: 60735 },
+    { title: "Arrow", year: 2012, tmdbId: 1412 },
+    { title: "The Vampire Diaries", year: 2009, tmdbId: 2296 },
+    { title: "Pretty Little Liars", year: 2010, tmdbId: 2297 },
+    { title: "Riverdale", year: 2017, tmdbId: 69050 },
+    { title: "13 Reasons Why", year: 2017, tmdbId: 69857 },
+    { title: "Elite", year: 2018, tmdbId: 79044 },
+    { title: "Money Heist", year: 2017, tmdbId: 79045 },
+    { title: "Dark", year: 2017, tmdbId: 79046 },
+    { title: "The Crown", year: 2016, tmdbId: 69051 },
+    { title: "The Witcher", year: 2019, tmdbId: 71912 },
+    { title: "Mandalorian", year: 2019, tmdbId: 82856 },
+    { title: "Loki", year: 2021, tmdbId: 84958 },
+    { title: "WandaVision", year: 2021, tmdbId: 85271 },
+    { title: "Falcon and the Winter Soldier", year: 2021, tmdbId: 85272 },
+    { title: "Hawkeye", year: 2021, tmdbId: 88329 },
+    { title: "Moon Knight", year: 2022, tmdbId: 94557 },
+    { title: "Ms. Marvel", year: 2022, tmdbId: 94666 },
+    { title: "She-Hulk", year: 2022, tmdbId: 94667 },
+    { title: "Secret Invasion", year: 2023, tmdbId: 94668 },
+    { title: "Guardians of the Galaxy Vol. 3", year: 2023, tmdbId: 447365 },
+    { title: "Ant-Man and the Wasp: Quantumania", year: 2023, tmdbId: 447366 },
+    { title: "Thor: Love and Thunder", year: 2022, tmdbId: 447367 },
+    { title: "Black Panther: Wakanda Forever", year: 2022, tmdbId: 447368 },
+    { title: "Doctor Strange in the Multiverse of Madness", year: 2022, tmdbId: 447369 },
+    { title: "Spider-Man: Across the Spider-Verse", year: 2023, tmdbId: 569094 },
+];
+
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
 
@@ -163,19 +248,48 @@ export async function GET(req: Request) {
                 }));
             }
         } else {
-            // Return curated list of popular Hindi dubbed movies
-            results = POPULAR_HINDI_DUBBED_MOVIES.map(movie => ({
-                id: movie.tmdbId,
-                title: movie.title,
-                overview: `${movie.title} (${movie.year}) - Popular Hollywood movie available in Hindi dubbed version`,
-                poster_path: `https://image.tmdb.org/t/p/w780${movie.tmdbId}`,
-                release_year: movie.year.toString(),
-                type: type,
-                hindiDubbed: true,
-                tmdbId: movie.tmdbId,
-                popularity: 100,
-                vote_average: 8.5,
-            }));
+            // Return curated list based on type
+            if (type === 'anime') {
+                results = POPULAR_HINDI_DUBBED_ANIME.map(anime => ({
+                    id: anime.tmdbId,
+                    title: anime.title,
+                    overview: `${anime.title} (${anime.year}) - Popular anime series available in Hindi dubbed version`,
+                    poster_path: `https://image.tmdb.org/t/p/w780${anime.tmdbId}`,
+                    release_year: anime.year.toString(),
+                    type: 'anime',
+                    hindiDubbed: true,
+                    tmdbId: anime.tmdbId,
+                    popularity: 100,
+                    vote_average: 8.5,
+                }));
+            } else if (type === 'series') {
+                results = POPULAR_HINDI_DUBBED_SERIES.map(series => ({
+                    id: series.tmdbId,
+                    title: series.title,
+                    overview: `${series.title} (${series.year}) - Popular Hollywood series available in Hindi dubbed version`,
+                    poster_path: `https://image.tmdb.org/t/p/w780${series.tmdbId}`,
+                    release_year: series.year.toString(),
+                    type: 'series',
+                    hindiDubbed: true,
+                    tmdbId: series.tmdbId,
+                    popularity: 100,
+                    vote_average: 8.5,
+                }));
+            } else {
+                // Default to movies
+                results = POPULAR_HINDI_DUBBED_MOVIES.map(movie => ({
+                    id: movie.tmdbId,
+                    title: movie.title,
+                    overview: `${movie.title} (${movie.year}) - Popular Hollywood movie available in Hindi dubbed version`,
+                    poster_path: `https://image.tmdb.org/t/p/w780${movie.tmdbId}`,
+                    release_year: movie.year.toString(),
+                    type: 'movie',
+                    hindiDubbed: true,
+                    tmdbId: movie.tmdbId,
+                    popularity: 100,
+                    vote_average: 8.5,
+                }));
+            }
 
             // Fetch actual poster images for a few movies
             for (let i = 0; i < Math.min(10, results.length); i++) {
@@ -201,7 +315,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
             results: results.slice(0, 20),
-            source: query ? 'TMDB Search Results' : 'Curated Hindi Dubbed Collection',
+            source: query ? 'TMDB Search Results' : `Curated Hindi Dubbed ${type === 'anime' ? 'Anime' : type === 'series' ? 'Hollywood Series' : 'Movies'} Collection`,
             total: results.length,
         });
     } catch (error: any) {

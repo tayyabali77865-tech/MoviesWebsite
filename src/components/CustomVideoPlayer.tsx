@@ -85,8 +85,6 @@ export function CustomVideoPlayer({
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
   const [currentServer, setCurrentServer] = useState(0);
   const [iframeLoading, setIframeLoading] = useState(true);
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('hi');
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -233,41 +231,26 @@ export function CustomVideoPlayer({
 
     if (xyzUrl) {
       // Enhanced Hindi parameters for better Hindi audio
-      const hindiParams = '?ds_lang=hi&lang=hi&subs=hi&audio=hi&cc=hi&dub=hi&hindi=hi&audio_lang=hi&sub_lang=hi';
+      const hindiParams = '?ds_lang=hi&lang=hi&subs=hi&audio=hi&cc=hi';
       const englishParams = '?ds_lang=en&lang=en&subs=en&audio=en&cc=en';
-      const spanishParams = '?ds_lang=es&lang=es&subs=es&audio=es&cc=es';
-      const frenchParams = '?ds_lang=fr&lang=fr&subs=fr&audio=fr&cc=fr';
-      
-      let langParams;
-      if (selectedLanguage === 'hi') {
-        langParams = hindiParams;
-      } else if (selectedLanguage === 'en') {
-        langParams = englishParams;
-      } else if (selectedLanguage === 'es') {
-        langParams = spanishParams;
-      } else if (selectedLanguage === 'fr') {
-        langParams = frenchParams;
-      } else {
-        langParams = `?ds_lang=${selectedLanguage}&lang=${selectedLanguage}`;
-      }
-      
+  
+      let langParams = hindiParams;
+  
       servers.push({
-        name: `VidSrc (${selectedLanguage === 'hi' ? 'Hindi Dub' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()})`,
+        name: 'VidSrc (Hindi Dub)',
         url: `${xyzUrl}${langParams}`
       });
-      
+  
       // Add alternative Hindi server with different parameters
-      if (selectedLanguage === 'hi') {
-        servers.push({
-          name: 'VidSrc (Hindi Alt)',
-          url: `${xyzUrl}?hindi=1&dub=hi&audio=hi&lang=hi&ds_lang=hi&subs=hi`
-        });
-        servers.push({
-          name: 'VidSrc (Hindi Pro)',
-          url: `${xyzUrl}?ds_lang=hi&hindi=1&dub=hi&audio=hi&cc=hi`
-        });
-      }
-      
+      servers.push({
+        name: 'VidSrc (Hindi Alt)',
+        url: `${xyzUrl}?hindi=1&dub=hi&audio=hi&lang=hi&ds_lang=hi&subs=hi`
+      });
+      servers.push({
+        name: 'VidSrc (Hindi Pro)',
+        url: `${xyzUrl}?ds_lang=hi&hindi=1&dub=hi&audio=hi&cc=hi`
+      });
+  
       servers.push({
         name: 'VidSrc (Global HD)',
         url: xyzUrl
@@ -277,15 +260,25 @@ export function CustomVideoPlayer({
     // VidSrc.to with enhanced Hindi support
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.to/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`
-        : `https://vidsrc.to/embed/movie/${tmdbId}?lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
-      servers.push({ name: `VidSrc.to (${selectedLanguage.toUpperCase()})`, url });
+        ? `https://vidsrc.to/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?lang=en&dub=en`
+        : `https://vidsrc.to/embed/movie/${tmdbId}?lang=en&dub=en`;
+      servers.push({ name: 'VidSrc.to (English)', url });
     }
 
     // VidSrc.me with enhanced Hindi support
     if (tmdbId) {
       const url = isTv
-        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`
+        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=en&dub=en`
+        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=en&dub=en`;
+      servers.push({ name: 'VidSrc.me (English)', url });
+    }
+
+    // VidSrc.me with enhanced Hindi support
+    if (tmdbId) {
+      const url = isTv
+        ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=en&dub=en`
+        : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=en&dub=en`;
+      servers.push({ name: 'VidSrc.me (English)', url });
         : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
       servers.push({ name: `VidSrc.me (${selectedLanguage.toUpperCase()})`, url });
     }
@@ -414,92 +407,6 @@ export function CustomVideoPlayer({
               )}
             </AnimatePresence>
 
-            {/* Language Selection Menu - Left Side */}
-            {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
-              <div className="absolute top-20 left-28 z-[60]">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                    className="flex items-center gap-2 px-4 py-2 bg-black/80 backdrop-blur-md rounded-lg border border-white/20 text-white hover:bg-white/10 transition-all"
-                  >
-                    <Languages className="w-4 h-4" />
-                    <span className="text-sm font-medium">
-                      {selectedLanguage === 'hi' ? 'हिंदी' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()}
-                    </span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  
-                  <AnimatePresence>
-                    {showLanguageMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="absolute top-full left-0 mt-2 w-48 bg-black/95 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden shadow-2xl z-[70]"
-                      >
-                        <button
-                          onClick={() => {
-                            setSelectedLanguage('hi');
-                            setShowLanguageMenu(false);
-                            setIframeLoading(true);
-                          }}
-                          className={clsx(
-                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
-                            selectedLanguage === 'hi' && "bg-red-600/20 text-red-400"
-                          )}
-                        >
-                          <span>🇮🇳</span>
-                          <span>हिंदी (Hindi)</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedLanguage('en');
-                            setShowLanguageMenu(false);
-                            setIframeLoading(true);
-                          }}
-                          className={clsx(
-                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
-                            selectedLanguage === 'en' && "bg-blue-600/20 text-blue-400"
-                          )}
-                        >
-                          <span>🇺🇸</span>
-                          <span>English</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedLanguage('es');
-                            setShowLanguageMenu(false);
-                            setIframeLoading(true);
-                          }}
-                          className={clsx(
-                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
-                            selectedLanguage === 'es' && "bg-yellow-600/20 text-yellow-400"
-                          )}
-                        >
-                          <span>🇪🇸</span>
-                          <span>Español</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedLanguage('fr');
-                            setShowLanguageMenu(false);
-                            setIframeLoading(true);
-                          }}
-                          className={clsx(
-                            "w-full px-4 py-3 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3",
-                            selectedLanguage === 'fr' && "bg-purple-600/20 text-purple-400"
-                          )}
-                        >
-                          <span>🇫🇷</span>
-                          <span>Français</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            )}
-
             {/* Server Switcher for Embeds */}
             {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
               <div className="absolute top-32 left-4 flex flex-wrap gap-2 z-[60]">
@@ -557,6 +464,7 @@ export function CustomVideoPlayer({
           </>
         )}
       </div>
-    </>
-  );
-}
+    </div>
+  </div>
+</div>
+</>
