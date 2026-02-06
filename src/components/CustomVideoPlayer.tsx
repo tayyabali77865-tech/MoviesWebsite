@@ -212,31 +212,12 @@ export function CustomVideoPlayer({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Enhanced server list with 2Embed API support
+  // Enhanced server list with VidSrc focus for better Hindi support
   const getEmbedServers = () => {
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
 
-    // 2Embed API - Best for Hindi dubbed content
-    if (tmdbId) {
-      if (isTv) {
-        servers.push({
-          name: '2Embed (Hindi TV)',
-          url: `https://www.2embed.cc/embedtvfull/${tmdbId}?s=${currentSeason}&e=${currentEpisode}&lang=hi`
-        });
-        servers.push({
-          name: '2Embed (Hindi Alt)',
-          url: `https://www.2embed.cc/embedtv/${tmdbId}/${currentSeason}/${currentEpisode}?dub=hi&lang=hi`
-        });
-      } else {
-        servers.push({
-          name: '2Embed (Hindi Movie)',
-          url: `https://www.2embed.cc/embed/${tmdbId}?lang=hi&dub=hi`
-        });
-      }
-    }
-
-    // VidSrc XYZ with enhanced Hindi parameters
+    // VidSrc XYZ with enhanced Hindi parameters - Primary servers
     let xyzUrl = '';
     if (tmdbId) {
       xyzUrl = isTv
@@ -280,6 +261,10 @@ export function CustomVideoPlayer({
         servers.push({
           name: 'VidSrc (Hindi Alt)',
           url: `${xyzUrl}?hindi=1&dub=hi&audio=hi&lang=hi&ds_lang=hi&subs=hi`
+        });
+        servers.push({
+          name: 'VidSrc (Hindi Pro)',
+          url: `${xyzUrl}?ds_lang=hi&hindi=1&dub=hi&audio=hi&cc=hi`
         });
       }
       

@@ -80,9 +80,9 @@ export function VideoList({ videos }: { videos: Video[] }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-full">
       {selectedIds.length > 0 && (
-        <div className="sticky top-4 z-10 bg-blue-600 p-4 rounded-xl flex items-center justify-between shadow-2xl animate-in slide-in-from-top-4">
+        <div className="sticky top-4 z-10 bg-blue-600 p-4 rounded-xl flex items-center justify-between shadow-2xl animate-in slide-in-from-top-4 w-full">
           <div className="flex items-center gap-4 text-white">
             <span className="font-bold">{selectedIds.length} Selected</span>
             <button
@@ -101,12 +101,12 @@ export function VideoList({ videos }: { videos: Video[] }) {
         </div>
       )}
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 w-full">
         {videos.map((v) => (
           <div
             key={v.id}
             className={clsx(
-              "flex items-center gap-4 bg-surface-800 rounded-xl border border-white/10 p-4 transition-all group",
+              "flex items-center gap-4 bg-surface-800 rounded-xl border border-white/10 p-4 transition-all group w-full",
               selectedIds.includes(v.id) ? "ring-2 ring-blue-500 border-transparent bg-blue-500/5" : "hover:border-white/20"
             )}
           >
@@ -122,7 +122,7 @@ export function VideoList({ videos }: { videos: Video[] }) {
               </div>
             </div>
 
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <h3 className="font-medium text-white truncate">{v.title}</h3>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <span className="capitalize">{v.type}</span>
@@ -137,7 +137,7 @@ export function VideoList({ videos }: { videos: Video[] }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Link
                 href={`/admin/videos/${v.id}`}
                 className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
