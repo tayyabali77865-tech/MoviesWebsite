@@ -429,9 +429,9 @@ export function CustomVideoPlayer({
               )}
             </AnimatePresence>
 
-            {/* Language Selection Menu */}
+            {/* Language Selection Menu - Left Side */}
             {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
-              <div className="absolute top-20 right-4 z-[60]">
+              <div className="absolute top-20 left-28 z-[60]">
                 <div className="relative">
                   <button
                     onClick={() => setShowLanguageMenu(!showLanguageMenu)}
@@ -450,7 +450,7 @@ export function CustomVideoPlayer({
                         initial={{ opacity: 0, y: -10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="absolute top-full right-0 mt-2 w-48 bg-black/95 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden shadow-2xl z-[70]"
+                        className="absolute top-full left-0 mt-2 w-48 bg-black/95 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden shadow-2xl z-[70]"
                       >
                         <button
                           onClick={() => {
@@ -538,9 +538,16 @@ export function CustomVideoPlayer({
               </div>
             )}
 
-            {/* Top Controls - Only Close and Fullscreen */}
+            {/* Top Controls - Fullscreen on Left */}
             <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-50">
               <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={toggleFullscreen}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  {fullscreen ? <Minimize2 className="w-6 h-6 text-red-500" /> : <Maximize className="w-6 h-6" />}
+                </button>
                 {onClose && (
                   <button
                     type="button"
@@ -553,19 +560,12 @@ export function CustomVideoPlayer({
                 <div className="flex-1 mx-4 text-center">
                   <h1 className="text-lg font-semibold truncate text-white">{title}</h1>
                 </div>
-                <button
-                  type="button"
-                  onClick={toggleFullscreen}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  {fullscreen ? <Minimize2 className="w-6 h-6 text-red-500" /> : <Maximize className="w-6 h-6" />}
-                </button>
               </div>
             </div>
 
-            {/* Season/Episode Bar - Right Side for TV/Series */}
+            {/* Season/Episode Bar - Left Side for TV/Series */}
             {(type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && (
-              <div className="absolute top-20 right-4 bottom-20 w-20 bg-black/95 backdrop-blur-md rounded-lg border border-white/20 z-[50] flex flex-col items-center gap-3 p-3">
+              <div className="absolute top-20 left-4 bottom-20 w-20 bg-black/95 backdrop-blur-md rounded-lg border border-white/20 z-[50] flex flex-col items-center gap-3 p-3">
                 <div className="text-center mb-2">
                   <span className="text-xs text-gray-400 font-bold block mb-1">SEASON</span>
                   <input
