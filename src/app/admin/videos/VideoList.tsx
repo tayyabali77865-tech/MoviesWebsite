@@ -101,12 +101,12 @@ export function VideoList({ videos }: { videos: Video[] }) {
         </div>
       )}
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 min-w-0">
         {videos.map((v) => (
           <div
             key={v.id}
             className={clsx(
-              "flex items-center gap-4 bg-surface-800 rounded-xl border border-white/10 p-4 transition-all group",
+                "w-full flex items-center gap-4 bg-surface-800 rounded-xl border border-white/10 p-4 transition-all group",
               selectedIds.includes(v.id) ? "ring-2 ring-blue-500 border-transparent bg-blue-500/5" : "hover:border-white/20"
             )}
           >
