@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
+// Fallback to new key, and also override if the environment is providing the old/expired key
+let RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '15b79664b4msh8369588949b24b9p11bdb7jsn05a9fd41d672';
+if (RAPIDAPI_KEY.startsWith('a30165b')) {
+    RAPIDAPI_KEY = '15b79664b4msh8369588949b24b9p11bdb7jsn05a9fd41d672';
+}
+
 const MOVIEBOX_BASE_URL = 'https://moviebox-api.p.rapidapi.com';
 
 export async function GET(req: Request) {

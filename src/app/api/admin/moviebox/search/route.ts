@@ -2,13 +2,16 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
+// Fallback to new key, and also override if the environment is providing the old/expired key
+let RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '15b79664b4msh8369588949b24b9p11bdb7jsn05a9fd41d672';
+if (RAPIDAPI_KEY.startsWith('a30165b')) {
+    RAPIDAPI_KEY = '15b79664b4msh8369588949b24b9p11bdb7jsn05a9fd41d672';
+}
+
 const MOVIEBOX_BASE_URL = 'https://moviebox-api.p.rapidapi.com';
 
-if (!RAPIDAPI_KEY) {
-    console.error('RAPIDAPI_KEY is not defined in environment variables');
-} else {
-    console.log('MovieBox Search: Using API Key starting with:', RAPIDAPI_KEY.substring(0, 5));
+if (process.env.RAPIDAPI_KEY?.startsWith('a30165b')) {
+    console.warn('RAPIDAPI_KEY environment variable is still using the OLD key. Using fallback MovieBox key instead.');
 }
 
 export async function GET(req: Request) {
