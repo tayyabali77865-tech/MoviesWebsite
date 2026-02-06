@@ -212,10 +212,29 @@ export function CustomVideoPlayer({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Enhanced server list with dynamic language support
+  // Enhanced server list with 2Embed API support
   const getEmbedServers = () => {
     const servers = [];
     const isTv = type === 'tv' || type === 'series' || type === 'drama' || type === 'anime';
+
+    // 2Embed API - Best for Hindi dubbed content
+    if (tmdbId) {
+      if (isTv) {
+        servers.push({
+          name: '2Embed (Hindi TV)',
+          url: `https://www.2embed.cc/embedtvfull/${tmdbId}?s=${currentSeason}&e=${currentEpisode}&lang=hi`
+        });
+        servers.push({
+          name: '2Embed (Hindi Alt)',
+          url: `https://www.2embed.cc/embedtv/${tmdbId}/${currentSeason}/${currentEpisode}?dub=hi&lang=hi`
+        });
+      } else {
+        servers.push({
+          name: '2Embed (Hindi Movie)',
+          url: `https://www.2embed.cc/embed/${tmdbId}?lang=hi&dub=hi`
+        });
+      }
+    }
 
     // VidSrc XYZ with enhanced Hindi parameters
     let xyzUrl = '';
@@ -252,20 +271,20 @@ export function CustomVideoPlayer({
       }
       
       servers.push({
-        name: `Server 1 (${selectedLanguage === 'hi' ? 'Hindi Dub' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()})`,
+        name: `VidSrc (${selectedLanguage === 'hi' ? 'Hindi Dub' : selectedLanguage === 'en' ? 'English' : selectedLanguage.toUpperCase()})`,
         url: `${xyzUrl}${langParams}`
       });
       
       // Add alternative Hindi server with different parameters
       if (selectedLanguage === 'hi') {
         servers.push({
-          name: 'Server 2 (Hindi Alt)',
+          name: 'VidSrc (Hindi Alt)',
           url: `${xyzUrl}?hindi=1&dub=hi&audio=hi&lang=hi&ds_lang=hi&subs=hi`
         });
       }
       
       servers.push({
-        name: 'Server 3 (Global HD)',
+        name: 'VidSrc (Global HD)',
         url: xyzUrl
       });
     }
@@ -275,7 +294,7 @@ export function CustomVideoPlayer({
       const url = isTv
         ? `https://vidsrc.to/embed/tv/${tmdbId}/${currentSeason}/${currentEpisode}?lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`
         : `https://vidsrc.to/embed/movie/${tmdbId}?lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
-      servers.push({ name: `Server 4 (${selectedLanguage.toUpperCase()} VIP)`, url });
+      servers.push({ name: `VidSrc.to (${selectedLanguage.toUpperCase()})`, url });
     }
 
     // VidSrc.me with enhanced Hindi support
@@ -283,7 +302,7 @@ export function CustomVideoPlayer({
       const url = isTv
         ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&s=${currentSeason}&e=${currentEpisode}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`
         : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}&lang=${selectedLanguage}&dub=${selectedLanguage === 'hi' ? 'hi' : 'en'}`;
-      servers.push({ name: `Server 5 (${selectedLanguage.toUpperCase()} Legacy)`, url });
+      servers.push({ name: `VidSrc.me (${selectedLanguage.toUpperCase()})`, url });
     }
 
     return servers;
@@ -367,13 +386,7 @@ export function CustomVideoPlayer({
                   )}
                   <iframe
                     src={embedUrl}
-                    className={clsx(
-                      "w-full border-0 relative z-[30]",
-                      (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && "h-[calc(100%-6rem)]"
-                    )}
-                    style={{
-                      height: (type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') ? 'calc(100% - 6rem)' : '100%'
-                    }}
+                    className="w-full h-full border-0 relative z-[30]"
                     referrerPolicy="origin"
                     allowFullScreen
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -550,50 +563,48 @@ export function CustomVideoPlayer({
               </div>
             </div>
 
-            {/* Season/Episode Bar - Only for TV/Series */}
+            {/* Season/Episode Bar - Right Side for TV/Series */}
             {(type === 'tv' || type === 'series' || type === 'drama' || type === 'anime') && (
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-md z-[50] border-t border-white/10">
-                <div className="flex items-center justify-center gap-4 h-full px-4">
-                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
-                    <span className="text-xs text-gray-400 font-medium">Season</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={currentSeason}
-                      onChange={(e) => {
-                        const newSeason = parseInt(e.target.value) || 1;
-                        setCurrentSeason(newSeason);
-                        setIframeLoading(true);
-                      }}
-                      className="w-16 bg-transparent text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-1"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
-                    <span className="text-xs text-gray-400 font-medium">Episode</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={currentEpisode}
-                      onChange={(e) => {
-                        const newEpisode = parseInt(e.target.value) || 1;
-                        setCurrentEpisode(newEpisode);
-                        setIframeLoading(true);
-                      }}
-                      className="w-16 bg-transparent text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-1"
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={() => {
-                      setCurrentEpisode(currentEpisode + 1);
+              <div className="absolute top-20 right-4 bottom-20 w-20 bg-black/95 backdrop-blur-md rounded-lg border border-white/20 z-[50] flex flex-col items-center gap-3 p-3">
+                <div className="text-center mb-2">
+                  <span className="text-xs text-gray-400 font-bold block mb-1">SEASON</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={currentSeason}
+                    onChange={(e) => {
+                      const newSeason = parseInt(e.target.value) || 1;
+                      setCurrentSeason(newSeason);
                       setIframeLoading(true);
                     }}
-                    className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-colors"
-                  >
-                    Next Episode →
-                  </button>
+                    className="w-full bg-black/60 text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1 text-sm"
+                  />
                 </div>
+                
+                <div className="text-center mb-2">
+                  <span className="text-xs text-gray-400 font-bold block mb-1">EPISODE</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={currentEpisode}
+                    onChange={(e) => {
+                      const newEpisode = parseInt(e.target.value) || 1;
+                      setCurrentEpisode(newEpisode);
+                      setIframeLoading(true);
+                    }}
+                    className="w-full bg-black/60 text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1 text-sm"
+                  />
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setCurrentEpisode(currentEpisode + 1);
+                    setIframeLoading(true);
+                  }}
+                  className="w-full px-2 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-xs font-bold transition-colors"
+                >
+                  NEXT →
+                </button>
               </div>
             )}
 
