@@ -20,45 +20,45 @@ export default async function AdminVideosPage() {
   }) as any;
 
   return (
-    <div className="w-full overflow-x-hidden">
-      <div className="flex items-center justify-between mb-8 gap-4">
+    <div>
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-white">Videos</h1>
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex items-center gap-4">
           <Link
             href="/admin/videos/bulk"
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
           >
-            <Plus className="w-4 h-4 text-blue-500" /> Bulk Anime
+            <Plus className="w-5 h-5 text-blue-500" /> Bulk Anime
           </Link>
           <Link
             href="/admin/videos/bulk-movie"
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
           >
-            <Plus className="w-4 h-4 text-red-500" /> Bulk Movie
+            <Plus className="w-5 h-5 text-red-500" /> Bulk Movie
           </Link>
           <Link
             href="/admin/videos/bulk-bollywood"
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
           >
-            <Plus className="w-4 h-4 text-orange-500" /> Bulk Bollywood
+            <Plus className="w-5 h-5 text-orange-500" /> Bulk Bollywood
           </Link>
           <Link
             href="/admin/videos/bulk-hindi-dub"
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
           >
-            <Plus className="w-4 h-4 text-green-500" /> Hindi Dubbed
+            <Plus className="w-5 h-5 text-green-500" /> Hindi Dubbed
           </Link>
           <Link
             href="/admin/videos/bulk-moviebox"
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5 text-sm sm:text-base whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
           >
-            <Plus className="w-4 h-4 text-purple-500" /> MovieBox
+            <Plus className="w-5 h-5 text-purple-500" /> MovieBox
           </Link>
           <Link
             href="/admin/videos/new"
-            className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors text-sm sm:text-base whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors"
           >
-            <Plus className="w-4 h-4" /> Add Video
+            <Plus className="w-5 h-5" /> Add Video
           </Link>
         </div>
       </div>
