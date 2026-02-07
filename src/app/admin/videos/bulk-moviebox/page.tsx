@@ -48,13 +48,15 @@ export default function BulkMovieBoxImport() {
     let description = '';
 
     if (url.includes('moviebox') || url.includes('movibox') || url.includes('movie-box') || url.includes('movie_box') || 
-        url.includes('mb.') || url.includes('mov-box') || url.includes('moviebox.com') || url.includes('moviebox.org')) {
-      // For MovieBox links, we'll use them directly as iframe sources
+        url.includes('mb.') || url.includes('mov-box') || url.includes('moviebox.com') || url.includes('moviebox.org') ||
+        url.includes('123movienow') || url.includes('123movie') || url.includes('movienow') ||
+        url.includes('videoPlayPage') || url.includes('/movies/') || url.includes('/spa/')) {
+      // For MovieBox and similar streaming links, we'll use them directly as iframe sources
       platform = 'MovieBox';
       embedUrl = url;
       // Extract video ID from various MovieBox URL patterns
-      const urlMatch = url.match(/(?:moviebox|movibox|movie-box|movie_box|mb\.)\/(?:watch|video|play|embed)\/?([a-zA-Z0-9_-]+)/);
-      videoId = urlMatch ? urlMatch[1] : url.split('/').pop() || 'moviebox-video';
+      const urlMatch = url.match(/(?:moviebox|movibox|movie-box|movie_box|mb\.|123movienow|123movie|movienow)\/(?:watch|video|play|embed|spa)\/?([a-zA-Z0-9_-]+)/);
+      videoId = urlMatch ? urlMatch[1] : url.split('/').pop()?.split('?')[0] || 'moviebox-video';
       title = 'MovieBox Video';
       thumbnail = '';
       description = 'Video from MovieBox platform';
@@ -85,8 +87,10 @@ export default function BulkMovieBoxImport() {
       try {
         const urlParts = url.split('/');
         const possibleTitle = urlParts.find(part => part.includes('-') || part.length > 10);
-        if (possibleTitle && possibleTitle !== 'watch' && possibleTitle !== 'video' && possibleTitle !== 'play' && possibleTitle !== 'embed') {
-          const formattedTitle = possibleTitle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        if (possibleTitle && possibleTitle !== 'watch' && possibleTitle !== 'video' && possibleTitle !== 'play' && possibleTitle !== 'embed' && possibleTitle !== 'spa') {
+          // For URLs like "jujutsu-kaisen-hindi-Gjrqz0KXx7", extract the movie name part
+          const cleanTitle = possibleTitle.replace(/-[a-zA-Z0-9]{8,}$/, ''); // Remove the ID part at the end
+          const formattedTitle = cleanTitle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           updateLink(linkId, 'title', formattedTitle);
         }
         // Try to generate a thumbnail URL based on common patterns
@@ -246,7 +250,7 @@ export default function BulkMovieBoxImport() {
                             fetchVideoMetadata(e.target.value, link.id);
                           }
                         }}
-                        placeholder="https://moviebox.com/watch/video-id or https://movibox.com/embed/video-id"
+                        placeholder="https://moviebox.com/watch/video-id or https://123movienow.cc/spa/videoPlayPage/movies/movie-title"
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                       />
                       {link.url && (

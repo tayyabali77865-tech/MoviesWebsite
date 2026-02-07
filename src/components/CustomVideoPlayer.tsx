@@ -317,7 +317,7 @@ export function CustomVideoPlayer({
           <>
             {/* Background Media Container */}
             <div className="absolute inset-0 w-full h-full">
-              {currentSrc && !currentSrc.includes('dailymotion.com') && !currentSrc.includes('youtube.com') && !currentSrc.includes('youtu.be') && !currentSrc.includes('vimeo.com') && !currentSrc.includes('moviebox') ? (
+              {currentSrc && !currentSrc.includes('dailymotion.com') && !currentSrc.includes('youtube.com') && !currentSrc.includes('youtu.be') && !currentSrc.includes('vimeo.com') && !currentSrc.includes('moviebox') && !currentSrc.includes('123movienow') && !currentSrc.includes('123movie') && !currentSrc.includes('movienow') ? (
                 <video
                   ref={videoRef}
                   src={!hlsUrl ? currentSrc || undefined : undefined}
@@ -346,7 +346,7 @@ export function CustomVideoPlayer({
                     allowFullScreen
                   />
                 </div>
-              ) : currentSrc && (currentSrc.includes('youtube.com') || currentSrc.includes('youtu.be') || currentSrc.includes('vimeo.com') || currentSrc.includes('moviebox')) ? (
+              ) : currentSrc && (currentSrc.includes('youtube.com') || currentSrc.includes('youtu.be') || currentSrc.includes('vimeo.com') || currentSrc.includes('moviebox') || currentSrc.includes('123movienow') || currentSrc.includes('123movie') || currentSrc.includes('movienow')) ? (
                 <div className="relative w-full h-full bg-black">
                   <iframe
                     src={
@@ -357,11 +357,14 @@ export function CustomVideoPlayer({
                       currentSrc.includes('vimeo.com/') ? 
                         `https://player.vimeo.com/video/${currentSrc.split('vimeo.com/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
                       currentSrc.includes('moviebox') ? 
-                        // For MovieBox, use the URL directly if it's already an embed URL, or convert to embed
+                        // For MovieBox, use URL directly if it's already an embed URL, or convert to embed
                         currentSrc.includes('/embed/') ? currentSrc : 
                         currentSrc.includes('/watch/') ? currentSrc.replace('/watch/', '/embed/') :
                         currentSrc.includes('/video/') ? currentSrc.replace('/video/', '/embed/') :
                         currentSrc // Use as-is if no pattern matches
+                      : currentSrc.includes('123movienow') || currentSrc.includes('123movie') || currentSrc.includes('movienow') ?
+                        // For 123movienow and similar sites, use URL directly
+                        currentSrc
                       : currentSrc
                     }
                     className="w-full h-full border-0 absolute inset-0"
