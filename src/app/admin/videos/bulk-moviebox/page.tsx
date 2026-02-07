@@ -76,21 +76,36 @@ export default function BulkMovieBoxImport() {
       title = `Vimeo Video ${videoId}`;
       thumbnail = `https://vumbnail.com/${videoId}.jpg`;
       description = `Video from Vimeo with ID: ${videoId}`;
-    } else if (url.includes('moviebox') || url.includes('movibox')) {
+    } else if (url.includes('moviebox') || url.includes('movibox') || url.includes('movie-box') || url.includes('movie_box')) {
       // For MovieBox links, we'll use them directly as iframe sources
       platform = 'MovieBox';
       embedUrl = url;
+      videoId = url.split('/').pop() || 'moviebox-video';
       title = 'MovieBox Video';
       thumbnail = '';
       description = 'Video from MovieBox platform';
+    } else if (url.includes('embed') || url.includes('iframe')) {
+      // Generic embed URLs
+      platform = 'Embed';
+      embedUrl = url;
+      videoId = url.split('/').pop() || 'embed-video';
+      title = 'Embedded Video';
+      thumbnail = '';
+      description = 'Embedded video content';
     }
 
     return { videoId, platform, embedUrl, title, thumbnail, description };
   };
 
   const fetchVideoMetadata = async (url: string, linkId: string) => {
-    const { videoId, platform } = extractVideoInfo(url);
+    const { videoId, platform, title, thumbnail, description } = extractVideoInfo(url);
     
+    // Auto-fill basic info for all platforms
+    updateLink(linkId, 'title', title);
+    updateLink(linkId, 'thumbnailUrl', thumbnail);
+    updateLink(linkId, 'description', description);
+    
+    // Try to fetch better metadata for YouTube
     if (platform === 'YouTube' && videoId) {
       try {
         // Fetch YouTube video metadata using oEmbed
@@ -98,12 +113,31 @@ export default function BulkMovieBoxImport() {
         const response = await fetch(oembedUrl);
         if (response.ok) {
           const data = await response.json();
-          updateLink(linkId, 'title', data.title || '');
-          updateLink(linkId, 'thumbnailUrl', data.thumbnail_url || '');
-          updateLink(linkId, 'description', data.author_name || '');
+          updateLink(linkId, 'title', data.title || title);
+          updateLink(linkId, 'thumbnailUrl', data.thumbnail_url || thumbnail);
+          updateLink(linkId, 'description', data.author_name || description);
         }
       } catch (error) {
         console.log('Could not fetch YouTube metadata:', error);
+        // Keep the basic info that was already set
+      }
+    }
+    
+    // Try to fetch Dailymotion metadata
+    if (platform === 'Dailymotion' && videoId) {
+      try {
+        // Dailymotion API for video info
+        const apiUrl = `https://www.dailymotion.com/services/video/${videoId}?fields=title,description,thumbnail_url`;
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const data = await response.json();
+          updateLink(linkId, 'title', data.title || title);
+          updateLink(linkId, 'thumbnailUrl', data.thumbnail_url || thumbnail);
+          updateLink(linkId, 'description', data.description || description);
+        }
+      } catch (error) {
+        console.log('Could not fetch Dailymotion metadata:', error);
+        // Keep the basic info that was already set
       }
     }
   };
@@ -229,14 +263,14 @@ export default function BulkMovieBoxImport() {
                         value={link.url}
                         onChange={(e) => {
                           updateLink(link.id, 'url', e.target.value);
-                          // Auto-fill metadata when URL is pasted
-                          if (e.target.value && !link.title) {
+                          // Auto-fill metadata when URL is pasted/changed
+                          if (e.target.value) {
                             fetchVideoMetadata(e.target.value, link.id);
                           }
                         }}
                         onBlur={(e) => {
                           // Also fetch on blur in case user typed slowly
-                          if (e.target.value && !link.title) {
+                          if (e.target.value) {
                             fetchVideoMetadata(e.target.value, link.id);
                           }
                         }}

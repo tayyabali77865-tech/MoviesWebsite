@@ -28,6 +28,8 @@ interface TMDBResponse {
   page: number;
   total_pages: number;
   total_results: number;
+  status_message?: string; // For error responses
+  status_code?: number; // For error responses
 }
 
 const TMDB_API_KEY = '3fd2be2f0c70a2a598f084ddfb2348fd'; // Public TMDB API key
@@ -59,15 +61,33 @@ export default function SearchImportPage() {
       const data: TMDBResponse = await res.json();
       
       if (!res.ok) {
-        throw new Error('Search failed');
+        console.error('TMDB API Error:', data);
+        if (data.status_message) {
+          throw new Error(`TMDB API: ${data.status_message}`);
+        }
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       
       setResults(data.results || []);
       setTotalPages(data.total_pages || 1);
       setCurrentPage(data.page || 1);
     } catch (error) {
-      console.error(error);
-      toast.error(error instanceof Error ? error.message : 'Search failed');
+      console.error('Search error details:', error);
+      let errorMessage = 'Search failed';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('CORS')) {
+          errorMessage = 'CORS error - please check browser console';
+        } else if (error.message.includes('401')) {
+          errorMessage = 'Invalid API key';
+        } else if (error.message.includes('429')) {
+          errorMessage = 'Too many requests - please wait';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setSearching(false);
     }
