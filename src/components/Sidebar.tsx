@@ -70,7 +70,6 @@ export function Sidebar() {
                       <li key={item.label}>
                         <a
                           href={item.href}
-                          target="_blank"
                           rel="noopener noreferrer"
                           className={clsx(
                             'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
