@@ -76,11 +76,14 @@ export default function BulkMovieBoxImport() {
       title = `Vimeo Video ${videoId}`;
       thumbnail = `https://vumbnail.com/${videoId}.jpg`;
       description = `Video from Vimeo with ID: ${videoId}`;
-    } else if (url.includes('moviebox') || url.includes('movibox') || url.includes('movie-box') || url.includes('movie_box')) {
+    } else if (url.includes('moviebox') || url.includes('movibox') || url.includes('movie-box') || url.includes('movie_box') || 
+               url.includes('mb.') || url.includes('mov-box') || url.includes('moviebox.com') || url.includes('moviebox.org')) {
       // For MovieBox links, we'll use them directly as iframe sources
       platform = 'MovieBox';
       embedUrl = url;
-      videoId = url.split('/').pop() || 'moviebox-video';
+      // Extract video ID from various MovieBox URL patterns
+      const urlMatch = url.match(/(?:moviebox|movibox|movie-box|movie_box|mb\.)\/(?:watch|video|play|embed)\/?([a-zA-Z0-9_-]+)/);
+      videoId = urlMatch ? urlMatch[1] : url.split('/').pop() || 'moviebox-video';
       title = 'MovieBox Video';
       thumbnail = '';
       description = 'Video from MovieBox platform';
@@ -137,6 +140,26 @@ export default function BulkMovieBoxImport() {
         }
       } catch (error) {
         console.log('Could not fetch Dailymotion metadata:', error);
+        // Keep the basic info that was already set
+      }
+    }
+    
+    // Try to fetch MovieBox metadata
+    if (platform === 'MovieBox' && videoId) {
+      try {
+        // For MovieBox, we can try to extract title from URL or use a generic approach
+        const urlParts = url.split('/');
+        const possibleTitle = urlParts.find(part => part.includes('-') || part.length > 10);
+        if (possibleTitle) {
+          const formattedTitle = possibleTitle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          updateLink(linkId, 'title', formattedTitle);
+        }
+        // Try to generate a thumbnail URL based on common patterns
+        if (videoId && videoId !== 'moviebox-video') {
+          updateLink(linkId, 'thumbnailUrl', `https://img.moviebox.com/thumbnails/${videoId}.jpg`);
+        }
+      } catch (error) {
+        console.log('Could not fetch MovieBox metadata:', error);
         // Keep the basic info that was already set
       }
     }

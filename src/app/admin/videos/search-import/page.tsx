@@ -6,25 +6,23 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { clsx } from 'clsx';
 
-interface TMDBMovie {
-  id: number;
+interface MovieBoxMovie {
+  id: string;
   title: string;
+  original_title: string;
   overview: string;
-  poster_path: string | null;
-  backdrop_path: string | null;
+  poster_path: string;
+  backdrop_path: string;
   release_date: string;
   vote_average: number;
-  vote_count: number;
-  adult: boolean;
-  genre_ids: number[];
-  original_language: string;
-  original_title: string;
   popularity: number;
   video: boolean;
+  adult: boolean;
+  media_type: string;
 }
 
-interface TMDBResponse {
-  results: TMDBMovie[];
+interface MovieBoxResponse {
+  results: MovieBoxMovie[];
   page: number;
   total_pages: number;
   total_results: number;
@@ -32,15 +30,14 @@ interface TMDBResponse {
   status_code?: number; // For error responses
 }
 
-const TMDB_API_KEY = '3fd2be2f0c70a2a598f084ddfb2348fd'; // Public TMDB API key
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const MOVIEBOX_API_URL = '/api/moviebox/search';
 
 export default function SearchImportPage() {
   const [query, setQuery] = useState('');
-  const [searchType, setSearchType] = useState<'movie' | 'tv'>('movie');
+  const [searchType, setSearchType] = useState<'movie' | 'anime' | 'series' | 'drama'>('movie');
   const [searching, setSearching] = useState(false);
-  const [results, setResults] = useState<TMDBMovie[]>([]);
-  const [selected, setSelected] = useState<TMDBMovie[]>([]);
+  const [results, setResults] = useState<MovieBoxMovie[]>([]);
+  const [selected, setSelected] = useState<MovieBoxMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -54,16 +51,15 @@ export default function SearchImportPage() {
     
     setSearching(true);
     try {
-      const endpoint = searchType === 'movie' ? 'search/movie' : 'search/tv';
-      const url = `${TMDB_BASE_URL}/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
+      const url = `${MOVIEBOX_API_URL}?query=${encodeURIComponent(query)}&type=${searchType}&page=${page}`;
       
       const res = await fetch(url);
-      const data: TMDBResponse = await res.json();
+      const data: MovieBoxResponse = await res.json();
       
       if (!res.ok) {
-        console.error('TMDB API Error:', data);
+        console.error('MovieBox API Error:', data);
         if (data.status_message) {
-          throw new Error(`TMDB API: ${data.status_message}`);
+          throw new Error(`MovieBox API: ${data.status_message}`);
         }
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
@@ -104,7 +100,7 @@ export default function SearchImportPage() {
     searchMovies(page);
   };
 
-  const toggleSelect = (movie: TMDBMovie) => {
+  const toggleSelect = (movie: MovieBoxMovie) => {
     setSelected(prev =>
       prev.find(m => m.id === movie.id)
         ? prev.filter(m => m.id !== movie.id)
@@ -119,9 +115,9 @@ export default function SearchImportPage() {
       const videos = selected.map(movie => ({
         title: movie.title || movie.original_title,
         description: movie.overview,
-        thumbnailUrl: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '',
-        tmdbId: movie.id.toString(),
-        type: searchType === 'movie' ? 'movie' : 'series',
+        thumbnailUrl: movie.poster_path || '',
+        movieboxId: movie.id.toString(),
+        type: searchType === 'movie' ? 'movie' : searchType === 'anime' ? 'anime' : searchType === 'series' ? 'series' : 'drama',
         section: targetSection,
         hlsUrl: commonHlsUrl.trim() || undefined,
       }));
@@ -184,12 +180,14 @@ export default function SearchImportPage() {
               <div className="flex gap-2 p-1 bg-white/5 rounded-xl w-fit">
                 {[
                   { value: 'movie', label: 'Movies' },
-                  { value: 'tv', label: 'TV Shows' }
+                  { value: 'anime', label: 'Anime' },
+                  { value: 'series', label: 'Series' },
+                  { value: 'drama', label: 'Drama' }
                 ].map((type) => (
                   <button
                     key={type.value}
                     type="button"
-                    onClick={() => setSearchType(type.value as 'movie' | 'tv')}
+                    onClick={() => setSearchType(type.value as 'movie' | 'anime' | 'series' | 'drama')}
                     className={clsx(
                       "px-6 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-all",
                       searchType === type.value
