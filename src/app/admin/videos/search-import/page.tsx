@@ -1,3 +1,25 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import AdminQuickFix from '@/components/AdminQuickFix';
+
+export default async function SearchImportPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
+    redirect('/auth/login?callbackUrl=/admin/videos/search-import');
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Quick Fix — Import by URL</h1>
+      </div>
+      <div className="max-w-4xl">
+        <AdminQuickFix />
+      </div>
+    </div>
+  );
+}
 'use client';
 
 import { useState, useEffect } from 'react';
