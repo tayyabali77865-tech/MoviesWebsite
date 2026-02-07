@@ -63,6 +63,7 @@ model Video {
   malId         String?
   anilistId     String?
   netflixId     String?
+  movieboxUrl   String?
   type          String   @default("movie") // movie | anime | manga | trailer
   section       String   @default("new")   // trending | new | upcoming | random
   category      String?  // Deprecated, keeping for migration safety

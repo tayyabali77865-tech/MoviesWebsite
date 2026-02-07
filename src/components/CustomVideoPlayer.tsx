@@ -49,6 +49,7 @@ interface CustomVideoPlayerProps {
   malId?: string;
   anilistId?: string;
   netflixId?: string;
+  movieboxUrl?: string;
   season?: number;
   episode?: number;
   type?: string;
@@ -70,6 +71,7 @@ export function CustomVideoPlayer({
   malId,
   anilistId,
   netflixId,
+  movieboxUrl,
   season = 1,
   episode = 1,
   type = 'movie',
@@ -92,7 +94,7 @@ export function CustomVideoPlayer({
   const [currentSeason, setCurrentSeason] = useState(season);
   const [currentEpisode, setCurrentEpisode] = useState(episode);
 
-  const currentSrc = hlsUrl || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
+  const currentSrc = movieboxUrl || hlsUrl || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
   const isDailymotion = currentSrc && currentSrc.includes('dailymotion.com');
 
   // Detect mobile device
@@ -315,7 +317,7 @@ export function CustomVideoPlayer({
           <>
             {/* Background Media Container */}
             <div className="absolute inset-0 w-full h-full">
-              {currentSrc && !currentSrc.includes('dailymotion.com') ? (
+              {currentSrc && !currentSrc.includes('dailymotion.com') && !currentSrc.includes('youtube.com') && !currentSrc.includes('youtu.be') && !currentSrc.includes('vimeo.com') && !currentSrc.includes('moviebox') ? (
                 <video
                   ref={videoRef}
                   src={!hlsUrl ? currentSrc || undefined : undefined}
@@ -339,6 +341,22 @@ export function CustomVideoPlayer({
                 <div className="relative w-full h-full bg-black">
                   <iframe
                     src={`https://www.dailymotion.com/embed/video/${currentSrc.split('/video/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}&queue-enable=0&ui-logo=0`}
+                    className="w-full h-full border-0 absolute inset-0"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    allowFullScreen
+                  />
+                </div>
+              ) : currentSrc && (currentSrc.includes('youtube.com') || currentSrc.includes('youtu.be') || currentSrc.includes('vimeo.com') || currentSrc.includes('moviebox')) ? (
+                <div className="relative w-full h-full bg-black">
+                  <iframe
+                    src={currentSrc.includes('youtube.com/watch?v=') ? 
+                      `https://www.youtube.com/embed/${currentSrc.split('v=')[1]?.split('&')[0]}?autoplay=${autoplay ? 1 : 0}` :
+                      currentSrc.includes('youtu.be/') ? 
+                      `https://www.youtube.com/embed/${currentSrc.split('youtu.be/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
+                      currentSrc.includes('vimeo.com/') ? 
+                      `https://player.vimeo.com/video/${currentSrc.split('vimeo.com/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
+                      currentSrc
+                    }
                     className="w-full h-full border-0 absolute inset-0"
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                     allowFullScreen
