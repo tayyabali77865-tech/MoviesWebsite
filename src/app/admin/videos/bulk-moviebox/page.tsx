@@ -231,6 +231,15 @@ export default function BulkMovieBoxImport() {
                             fetchVideoMetadata(e.target.value, link.id);
                           }
                         }}
+                        onPaste={(e) => {
+                          // Handle paste event specifically
+                          setTimeout(() => {
+                            const pastedValue = (e.target as HTMLInputElement).value;
+                            if (pastedValue) {
+                              fetchVideoMetadata(pastedValue, link.id);
+                            }
+                          }, 100);
+                        }}
                         onBlur={(e) => {
                           // Also fetch on blur in case user typed slowly
                           if (e.target.value) {

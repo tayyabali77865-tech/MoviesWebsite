@@ -349,13 +349,20 @@ export function CustomVideoPlayer({
               ) : currentSrc && (currentSrc.includes('youtube.com') || currentSrc.includes('youtu.be') || currentSrc.includes('vimeo.com') || currentSrc.includes('moviebox')) ? (
                 <div className="relative w-full h-full bg-black">
                   <iframe
-                    src={currentSrc.includes('youtube.com/watch?v=') ? 
-                      `https://www.youtube.com/embed/${currentSrc.split('v=')[1]?.split('&')[0]}?autoplay=${autoplay ? 1 : 0}` :
+                    src={
+                      currentSrc.includes('youtube.com/watch?v=') ? 
+                        `https://www.youtube.com/embed/${currentSrc.split('v=')[1]?.split('&')[0]}?autoplay=${autoplay ? 1 : 0}` :
                       currentSrc.includes('youtu.be/') ? 
-                      `https://www.youtube.com/embed/${currentSrc.split('youtu.be/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
+                        `https://www.youtube.com/embed/${currentSrc.split('youtu.be/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
                       currentSrc.includes('vimeo.com/') ? 
-                      `https://player.vimeo.com/video/${currentSrc.split('vimeo.com/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
-                      currentSrc
+                        `https://player.vimeo.com/video/${currentSrc.split('vimeo.com/')[1]?.split('?')[0]}?autoplay=${autoplay ? 1 : 0}` :
+                      currentSrc.includes('moviebox') ? 
+                        // For MovieBox, use the URL directly if it's already an embed URL, or convert to embed
+                        currentSrc.includes('/embed/') ? currentSrc : 
+                        currentSrc.includes('/watch/') ? currentSrc.replace('/watch/', '/embed/') :
+                        currentSrc.includes('/video/') ? currentSrc.replace('/video/', '/embed/') :
+                        currentSrc // Use as-is if no pattern matches
+                      : currentSrc
                     }
                     className="w-full h-full border-0 absolute inset-0"
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"

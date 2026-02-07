@@ -20,12 +20,17 @@ export async function GET(request: NextRequest) {
     try {
       const tmdbEndpoint = type === 'movie' ? 'search/movie' : 'search/tv';
       const tmdbUrl = `${TMDB_BASE_URL}/${tmdbEndpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
+      console.log('Fetching TMDB:', tmdbUrl);
       const tmdbResponse = await fetch(tmdbUrl);
+      console.log('TMDB Response status:', tmdbResponse.status);
       if (tmdbResponse.ok) {
         tmdbMetadata = await tmdbResponse.json();
+        console.log('TMDB Data:', tmdbMetadata);
+      } else {
+        console.log('TMDB failed, status:', tmdbResponse.status);
       }
     } catch (error) {
-      console.log('TMDB metadata fetch failed, using fallback');
+      console.log('TMDB metadata fetch failed, using fallback:', error);
     }
 
     // Generate MovieBox results with TMDB metadata or fallback
@@ -72,14 +77,14 @@ function generateMovieBoxResults(query: string, type: string, page: number, tmdb
       });
     });
   } else {
-    // Fallback results if TMDB fails
+    // Fallback results if TMDB fails - always provide data
     for (let i = 1; i <= 5; i++) {
       const id = `mb_${Date.now()}_${i}`;
       baseResults.push({
         id,
-        title: `${query} - MovieBox ${type.charAt(0).toUpperCase() + type.slice(1)} ${i}`,
-        original_title: `${query} - MovieBox ${type.charAt(0).toUpperCase() + type.slice(1)} ${i}`,
-        overview: `This is a great ${type} from MovieBox matching your search for "${query}". High quality streaming available.`,
+        title: `${query} - ${type.charAt(0).toUpperCase() + type.slice(1)} ${i}`,
+        original_title: `${query} - ${type.charAt(0).toUpperCase() + type.slice(1)} ${i}`,
+        overview: `This is a great ${type} from MovieBox matching your search for "${query}". High quality streaming available on MovieBox platform.`,
         poster_path: `https://via.placeholder.com/500x750/FF6B6B/FFFFFF?text=${encodeURIComponent(query)}+${i}`,
         backdrop_path: `https://via.placeholder.com/1280x720/4ECDC4/FFFFFF?text=${encodeURIComponent(query)}+${i}`,
         release_date: '2024-01-15',
