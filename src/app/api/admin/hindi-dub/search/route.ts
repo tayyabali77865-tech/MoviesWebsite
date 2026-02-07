@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_API_KEY = process.env.TMDB_API_KEY || 'YOUR_TMDB_KEY';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const POPULAR_HINDI_DUBBED_MOVIES = [
     { title: "Avengers: Endgame", year: 2019, tmdbId: 299536 },
@@ -242,20 +242,17 @@ export async function GET(req: Request) {
 
             if (res.ok) {
                 const data = await res.json();
-                console.log(`✓ Found ${data.results?.length || 0} Hollywood movies matching "${query}"`);
-                
                 results = (data.results || []).map((item: any) => ({
                     id: item.id,
                     title: item.title || item.name,
                     overview: item.overview || 'No description available',
-                    poster_path: item.poster_path || null, // Raw path - frontend will concatenate
+                    poster_path: item.poster_path ? `https://image.tmdb.org/t/p/w780${item.poster_path}` : null,
                     release_year: item.release_date?.split('-')[0] || item.first_air_date?.split('-')[0] || null,
                     type: type,
                     hindiDubbed: true,
                     tmdbId: item.id,
                     popularity: item.popularity,
                     vote_average: item.vote_average,
-                    original_language: item.original_language, // en for Hollywood
                 }));
             } else {
                 const errorData = await res.text();

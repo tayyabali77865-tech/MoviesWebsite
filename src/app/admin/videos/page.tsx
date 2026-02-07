@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { VideoList } from './VideoList';
 import Link from 'next/link';
-import { Plus, Globe } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import AdminMovieboxImporter from '@/components/AdminMovieboxImporter';
 
 export default async function AdminVideosPage() {
   const session = await getServerSession(authOptions);
@@ -55,18 +56,16 @@ export default async function AdminVideosPage() {
             <Plus className="w-5 h-5 text-cyan-500" /> Search & Import
           </Link>
           <Link
-            href="/admin/videos/bulk-hindi-dubbed"
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-colors border border-white/5"
-          >
-            <Globe className="w-5 h-5 text-green-500" /> Hindi Dubbed
-          </Link>
-          <Link
             href="/admin/videos/new"
             className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors"
           >
             <Plus className="w-5 h-5" /> Add Video
           </Link>
         </div>
+      </div>
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-white mb-2">Quick Import</h2>
+        <AdminMovieboxImporter />
       </div>
       <VideoList videos={videos} />
     </div>
