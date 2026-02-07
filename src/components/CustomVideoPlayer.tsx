@@ -83,6 +83,7 @@ export function CustomVideoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [currentServer, setCurrentServer] = useState(0);
   const [iframeLoading, setIframeLoading] = useState(true);
   const [volume, setVolume] = useState(1);
@@ -90,6 +91,21 @@ export function CustomVideoPlayer({
   const [showControls, setShowControls] = useState(true);
   const [currentSeason, setCurrentSeason] = useState(season);
   const [currentEpisode, setCurrentEpisode] = useState(episode);
+
+  // Detect mobile device for responsive design
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const currentSrc = movieboxUrl || hlsUrl || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
   const isDailymotion = currentSrc && currentSrc.includes('dailymotion.com');
@@ -262,13 +278,19 @@ export function CustomVideoPlayer({
     <>
       <div
         ref={containerRef}
-        className="fixed inset-0 z-50 bg-black flex flex-col select-none touch-none overflow-hidden text-white"
+        className={clsx(
+          "fixed inset-0 z-50 bg-black flex flex-col select-none touch-none overflow-hidden text-white",
+          isMobile ? "text-xs" : "text-base"
+        )}
       >
         {minimized && onMinimize ? (
           <motion.div
             initial={{ y: 100 }}
             animate={{ y: 0 }}
-            className="absolute bottom-4 right-4 z-[100] w-72 rounded-lg overflow-hidden shadow-2xl bg-black border border-white/20"
+            className={clsx(
+              "absolute bottom-4 right-4 z-[100] overflow-hidden shadow-2xl bg-black border border-white/20",
+              isMobile ? "w-56 h-40" : "w-72 rounded-lg"
+            )}
           >
             <div className="relative aspect-video">
               <video
@@ -375,16 +397,155 @@ export function CustomVideoPlayer({
                       <button
                         onClick={onClose}
                         className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm"
-                      >
-                        Close Player
-                      </button>
-                    )}
                   </div>
+                )}
+                <iframe
+                  src={embedUrl}
+                  className="w-full h-full border-0 relative z-[30]"
+                  referrerPolicy="origin"
+                  allowFullScreen
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  onLoad={() => setIframeLoading(false)}
+                />
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white z-10">
+                <div className="text-center p-4">
+                  <p className="text-xl font-bold text-red-500 mb-2">No Video Source</p>
+                  <p className="text-gray-400">This video does not have any playable URLs or identifiers.</p>
+                  {onClose && (
+                    <button
+                      onClick={onClose}
+                      className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm"
+                    >
+                      Close Player
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+
+          {/* Video Controls - Responsive Design */}
+          {!minimized && (
+            <div className={clsx(
+              "absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-50",
+              isMobile ? "flex-col gap-2" : "flex items-center justify-between"
+            )}>
+              {/* Left Controls - Responsive */}
+              <div className={clsx(
+                "flex items-center gap-2",
+                isMobile ? "w-full" : "flex-1"
+              )}>
+                {/* Play/Pause Button - Mobile Responsive */}
+                <button
+                  type="button"
+                  onClick={() => setPlaying(!playing)}
+                  className={clsx(
+                    "p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors",
+                    isMobile ? "w-12 h-12" : "w-10 h-10"
+                  )}
+                >
+                  {playing ? (
+                    <Pause className={clsx("text-white", isMobile ? "w-6 h-6" : "w-5 h-5")} />
+                  ) : (
+                    <Play className={clsx("text-white", isMobile ? "w-6 h-6" : "w-5 h-5")} />
+                  )}
+                </button>
+
+                {/* Volume Control - Mobile Responsive */}
+                <div className={clsx(
+                  "flex items-center gap-2",
+                  isMobile ? "order-3" : ""
+                )}>
+                  <button
+                    type="button"
+                    onClick={() => setMuted(!muted)}
+                    className={clsx(
+                      "p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors",
+                      isMobile ? "w-10 h-10" : "w-8 h-8"
+                    )}
+                  >
+                    {muted ? (
+                      <VolumeX className={clsx("text-white", isMobile ? "w-5 h-5" : "w-4 h-4")} />
+                    ) : (
+                      <Volume2 className={clsx("text-white", isMobile ? "w-5 h-5" : "w-4 h-4")} />
+                    )}
+                  </button>
+                </div>
+
+                {/* Time Display - Always Visible */}
+                <div className={clsx(
+                  "text-white text-xs font-mono bg-black/50 px-3 py-1 rounded",
+                  isMobile ? "order-2 text-center" : ""
+                )}>
+                  {formatTime(currentTime)}
+                </div>
+
+                {/* Settings Button - Mobile Responsive */}
+                <div className={clsx(
+                  isMobile ? "order-1" : ""
+                )}>
+                  <button
+                    type="button"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className={clsx(
+                      "p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors",
+                      isMobile ? "w-10 h-10" : "w-8 h-8"
+                    )}
+                  >
+                    <Settings className={clsx("text-white", isMobile ? "w-5 h-5" : "w-4 h-4")} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Controls - Responsive */}
+              <div className={clsx(
+                "flex items-center gap-2",
+                isMobile ? "w-full justify-between order-4" : ""
+              )}>
+                {onClose && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={clsx(
+                      "p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors",
+                      isMobile ? "w-16 h-10" : "w-8 h-8"
+                    )}
+                  >
+                    <X className={clsx("text-white", isMobile ? "w-5 h-5" : "w-4 h-4")} />
+                  </button>
+                )}
+
+                {/* Fullscreen Button - Mobile Responsive */}
+                <button
+                  type="button"
+                  onClick={toggleFullscreen}
+                  className={clsx(
+                    "p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors",
+                    isMobile ? "w-16 h-10" : "w-8 h-8"
+                  )}
+                >
+                  {fullscreen ? (
+                    <Minimize2 className={clsx("text-red-500", isMobile ? "w-5 h-5" : "w-4 h-4")} />
+                  ) : (
+                    <Maximize className={clsx("text-white", isMobile ? "w-5 h-5" : "w-4 h-4")} />
+                  )}
+                </button>
+              </div>
             </div>
 
-            
+            {/* Title Display - Mobile Responsive */}
+            <div className={clsx(
+              "absolute top-4 left-4 right-4 text-center",
+              isMobile ? "order-5" : "flex-1 mx-4"
+            )}>
+              <h1 className={clsx(
+                "text-lg font-semibold truncate text-white",
+                isMobile ? "text-sm" : ""
+              )}>{title}</h1>
+            </div>
+
             {/* Server Switcher for Embeds */}
             {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
               <div className="absolute top-32 left-4 flex flex-wrap gap-2 z-[60]">
@@ -407,31 +568,6 @@ export function CustomVideoPlayer({
                 ))}
               </div>
             )}
-
-            {/* Top Controls - Fullscreen on Right Side Only */}
-            <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-50">
-              <div className="flex items-center justify-between">
-                {onClose && (
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                )}
-                <div className="flex-1 mx-4 text-center">
-                  <h1 className="text-lg font-semibold truncate text-white">{title}</h1>
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleFullscreen}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  {fullscreen ? <Minimize2 className="w-6 h-6 text-red-500" /> : <Maximize className="w-6 h-6" />}
-                </button>
-              </div>
-            </div>
 
             {/* Enhanced Hindi Language Note for Embeds */}
             {!currentSrc && (
