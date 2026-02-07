@@ -6,7 +6,6 @@ import {
   Maximize,
   Minimize2,
   X,
-  Smartphone,
   Loader2,
   Settings,
   Languages,
@@ -84,8 +83,6 @@ export function CustomVideoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showRotatePrompt, setShowRotatePrompt] = useState(false);
   const [currentServer, setCurrentServer] = useState(0);
   const [iframeLoading, setIframeLoading] = useState(true);
   const [volume, setVolume] = useState(1);
@@ -97,28 +94,7 @@ export function CustomVideoPlayer({
   const currentSrc = movieboxUrl || hlsUrl || sources['720'] || sources['480'] || sources['360'] || sources['1080'];
   const isDailymotion = currentSrc && currentSrc.includes('dailymotion.com');
 
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      setIsMobile(isMobileDevice);
-      if (isMobileDevice && !window.matchMedia("(orientation: landscape)").matches) {
-        setShowRotatePrompt(true);
-      } else {
-        setShowRotatePrompt(false);
-      }
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    window.addEventListener('orientationchange', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('orientationchange', checkMobile);
-    };
-  }, []);
-
+  
   // Reset iframe loading when server changes
   useEffect(() => {
     if (!currentSrc && (tmdbId || malId || netflixId || anilistId)) {
@@ -408,24 +384,7 @@ export function CustomVideoPlayer({
               )}
             </div>
 
-            {/* Mobile Rotate Prompt */}
-            <AnimatePresence>
-              {showRotatePrompt && isMobile && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm"
-                >
-                  <div className="text-center p-8 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-md">
-                    <Smartphone className="w-16 h-16 mx-auto mb-4 text-white animate-pulse" />
-                    <h3 className="text-xl font-bold text-white mb-2">Rotate Your Device</h3>
-                    <p className="text-gray-300 text-sm">For the best viewing experience, please rotate your device to landscape mode.</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
+            
             {/* Server Switcher for Embeds */}
             {!currentSrc && (tmdbId || malId || netflixId || anilistId) && (
               <div className="absolute top-32 left-4 flex flex-wrap gap-2 z-[60]">
