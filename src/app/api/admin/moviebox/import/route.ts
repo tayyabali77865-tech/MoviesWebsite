@@ -17,9 +17,19 @@ export async function POST(req: Request) {
   try {
     const parsed = new URL(url);
 
-    // Basic host validation: only allow moviebox hostnames for this importer
-    if (!/moviebox/i.test(parsed.hostname)) {
-      return NextResponse.json({ error: 'Only MovieBox URLs are accepted' }, { status: 400 });
+    // Basic host validation: allow MovieBox and common mirror hostnames (123movienow, 123movie, movienow, etc.)
+    const allowedHostPattern = /(moviebox|123movienow|123movie|movienow|movier|123movies|moviz|movierulz|movizland|watchmovies)/i;
+    if (!allowedHostPattern.test(parsed.hostname)) {
+      // If host not in allowlist, still attempt to import if an iframe/embed is present, otherwise reject.
+      // This gives flexibility for mirrors while preventing accidental scraping of unrelated sites.
+      const probeRes = await fetch(url, { headers: { 'User-Agent': 'Complet-Admin/1.0' } });
+      const probeHtml = await probeRes.text().catch(() => '');
+      const $$ = cheerio.load(probeHtml);
+      const possibleIframe = $$('iframe[src]').first();
+      if (!possibleIframe || !possibleIframe.attr('src')) {
+        return NextResponse.json({ error: 'Only MovieBox or compatible mirror URLs are accepted' }, { status: 400 });
+      }
+      // otherwise continue and let the normal parsing handle the embed
     }
 
     const res = await fetch(url, { headers: { 'User-Agent': 'Complet-Admin/1.0' } });
