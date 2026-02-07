@@ -65,15 +65,18 @@ model Video {
   netflixId     String?
   movieboxUrl   String?
   type          String   @default("movie") // movie | anime | manga | trailer
-  section       String   @default("new")   // trending | new | upcoming | random
+  section       String   @default("new")   // trending | new | upcoming | random | hindi-dubbed
   category      String?  // Deprecated, keeping for migration safety
   url360        String?
   url480        String?
   url720        String?
   url1080       String?
   hlsUrl        String?
+  hindiDubHlsUrl String? // Separate HLS URL for Hindi dubbed version
   defaultSpeed  Float    @default(1)
   autoplay      Boolean  @default(false)
+  isHindiDubbed Boolean  @default(false) // Flag for Hindi dubbed movies
+  audioLanguage String?  // Primary audio language (en, hi, etc.)
   subtitles     Subtitle[]
   audioTracks   AudioTrack[]
   seasonNumber  Int?     @default(1)
@@ -83,6 +86,9 @@ model Video {
   episodes      Video[]  @relation("SeriesEpisodes")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([isHindiDubbed])
+  @@index([audioLanguage])
 }
 
 model Subtitle {

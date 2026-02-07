@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY || 'YOUR_TMDB_KEY';
-
-// List of popular Hollywood movies known to have Hindi dubs
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const POPULAR_HINDI_DUBBED_MOVIES = [
     { title: "Avengers: Endgame", year: 2019, tmdbId: 299536 },
     { title: "Avengers: Infinity War", year: 2018, tmdbId: 299534 },
@@ -225,27 +224,46 @@ export async function GET(req: Request) {
         let results = [];
 
         if (query) {
-            // Search TMDB for specific title
+            // Search TMDB for specific title - Filter for English language (Hollywood)
             const mediaType = type === 'series' ? 'tv' : 'movie';
-            const url = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US`;
             
-            console.log('Fetching TMDB for search:', url);
+            if (!TMDB_API_KEY) {
+                console.error('TMDB_API_KEY not configured');
+                return NextResponse.json({ 
+                    error: 'TMDB API Key not configured',
+                    results: []
+                }, { status: 500 });
+            }
+
+            const url = `${TMDB_BASE_URL}/search/${mediaType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&original_language=en&page=1`;
+            
+            console.log('Fetching TMDB for Hindi dubbed search:', url.replace(TMDB_API_KEY, 'HIDDEN'));
             const res = await fetch(url, { cache: 'no-store' });
 
             if (res.ok) {
                 const data = await res.json();
+                console.log(`✓ Found ${data.results?.length || 0} Hollywood movies matching "${query}"`);
+                
                 results = (data.results || []).map((item: any) => ({
                     id: item.id,
                     title: item.title || item.name,
                     overview: item.overview || 'No description available',
-                    poster_path: item.poster_path ? `https://image.tmdb.org/t/p/w780${item.poster_path}` : null,
+                    poster_path: item.poster_path || null, // Raw path - frontend will concatenate
                     release_year: item.release_date?.split('-')[0] || item.first_air_date?.split('-')[0] || null,
                     type: type,
                     hindiDubbed: true,
                     tmdbId: item.id,
                     popularity: item.popularity,
                     vote_average: item.vote_average,
+                    original_language: item.original_language, // en for Hollywood
                 }));
+            } else {
+                const errorData = await res.text();
+                console.error('✗ TMDB API error:', errorData);
+                return NextResponse.json({ 
+                    error: `TMDB API Error: ${res.status}`,
+                    results: []
+                }, { status: res.status });
             }
         } else {
             // Return curated list based on type
@@ -254,7 +272,7 @@ export async function GET(req: Request) {
                     id: anime.tmdbId,
                     title: anime.title,
                     overview: `${anime.title} (${anime.year}) - Popular anime series available in Hindi dubbed version`,
-                    poster_path: `https://image.tmdb.org/t/p/w780${anime.tmdbId}`,
+                    poster_path: null, // Will fetch actual posters
                     release_year: anime.year.toString(),
                     type: 'anime',
                     hindiDubbed: true,
@@ -267,7 +285,7 @@ export async function GET(req: Request) {
                     id: series.tmdbId,
                     title: series.title,
                     overview: `${series.title} (${series.year}) - Popular Hollywood series available in Hindi dubbed version`,
-                    poster_path: `https://image.tmdb.org/t/p/w780${series.tmdbId}`,
+                    poster_path: null,
                     release_year: series.year.toString(),
                     type: 'series',
                     hindiDubbed: true,
@@ -276,36 +294,42 @@ export async function GET(req: Request) {
                     vote_average: 8.5,
                 }));
             } else {
-                // Default to movies
+                // Default to curated Hollywood movies
                 results = POPULAR_HINDI_DUBBED_MOVIES.map(movie => ({
                     id: movie.tmdbId,
                     title: movie.title,
                     overview: `${movie.title} (${movie.year}) - Popular Hollywood movie available in Hindi dubbed version`,
-                    poster_path: `https://image.tmdb.org/t/p/w780${movie.tmdbId}`,
+                    poster_path: null,
                     release_year: movie.year.toString(),
                     type: 'movie',
                     hindiDubbed: true,
                     tmdbId: movie.tmdbId,
                     popularity: 100,
                     vote_average: 8.5,
+                    original_language: 'en',
                 }));
             }
 
-            // Fetch actual poster images for a few movies
-            for (let i = 0; i < Math.min(10, results.length); i++) {
-                try {
-                    const posterRes = await fetch(`https://api.themoviedb.org/3/movie/${results[i].tmdbId}?api_key=${TMDB_API_KEY}`, { cache: 'no-store' });
-                    if (posterRes.ok) {
-                        const posterData = await posterRes.json();
-                        if (posterData.poster_path) {
-                            results[i].poster_path = `https://image.tmdb.org/t/p/w780${posterData.poster_path}`;
+            // Fetch actual poster images and details for all curated results
+            if (TMDB_API_KEY) {
+                for (let i = 0; i < results.length; i++) {
+                    try {
+                        const endpoint = type === 'anime' || type === 'series' ? 'tv' : 'movie';
+                        const posterUrl = `${TMDB_BASE_URL}/${endpoint}/${results[i].tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`;
+                        const posterRes = await fetch(posterUrl, { cache: 'no-store' });
+                        
+                        if (posterRes.ok) {
+                            const posterData = await posterRes.json();
+                            if (posterData.poster_path) {
+                                results[i].poster_path = posterData.poster_path; // Return raw path
+                            }
+                            if (posterData.overview && posterData.overview.length > results[i].overview.length - 50) {
+                                results[i].overview = posterData.overview;
+                            }
                         }
-                        if (posterData.overview) {
-                            results[i].overview = posterData.overview;
-                        }
+                    } catch (error) {
+                        console.log(`Failed to fetch details for ${results[i].title}`);
                     }
-                } catch (error) {
-                    console.log(`Failed to fetch poster for ${results[i].title}:`, error);
                 }
             }
         }
