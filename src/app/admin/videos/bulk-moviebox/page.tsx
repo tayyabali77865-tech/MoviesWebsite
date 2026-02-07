@@ -39,7 +39,7 @@ export default function BulkMovieBoxImport() {
   };
 
   const extractVideoInfo = (url: string) => {
-    // Extract video ID and title from various video platforms
+    // Only support MovieBox URLs
     let videoId = '';
     let platform = '';
     let embedUrl = '';
@@ -47,37 +47,8 @@ export default function BulkMovieBoxImport() {
     let thumbnail = '';
     let description = '';
 
-    if (url.includes('youtube.com/watch?v=')) {
-      videoId = url.split('v=')[1]?.split('&')[0] || '';
-      platform = 'YouTube';
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      // YouTube oEmbed API for metadata
-      title = `YouTube Video ${videoId}`;
-      thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-      description = `Video from YouTube with ID: ${videoId}`;
-    } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
-      platform = 'YouTube';
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      title = `YouTube Video ${videoId}`;
-      thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-      description = `Video from YouTube with ID: ${videoId}`;
-    } else if (url.includes('dailymotion.com/video/')) {
-      videoId = url.split('/video/')[1]?.split('?')[0] || '';
-      platform = 'Dailymotion';
-      embedUrl = `https://www.dailymotion.com/embed/video/${videoId}`;
-      title = `Dailymotion Video ${videoId}`;
-      thumbnail = `https://www.dailymotion.com/thumbnail/video/${videoId}`;
-      description = `Video from Dailymotion with ID: ${videoId}`;
-    } else if (url.includes('vimeo.com/')) {
-      videoId = url.split('vimeo.com/')[1]?.split('?')[0] || '';
-      platform = 'Vimeo';
-      embedUrl = `https://player.vimeo.com/video/${videoId}`;
-      title = `Vimeo Video ${videoId}`;
-      thumbnail = `https://vumbnail.com/${videoId}.jpg`;
-      description = `Video from Vimeo with ID: ${videoId}`;
-    } else if (url.includes('moviebox') || url.includes('movibox') || url.includes('movie-box') || url.includes('movie_box') || 
-               url.includes('mb.') || url.includes('mov-box') || url.includes('moviebox.com') || url.includes('moviebox.org')) {
+    if (url.includes('moviebox') || url.includes('movibox') || url.includes('movie-box') || url.includes('movie_box') || 
+        url.includes('mb.') || url.includes('mov-box') || url.includes('moviebox.com') || url.includes('moviebox.org')) {
       // For MovieBox links, we'll use them directly as iframe sources
       platform = 'MovieBox';
       embedUrl = url;
@@ -87,14 +58,14 @@ export default function BulkMovieBoxImport() {
       title = 'MovieBox Video';
       thumbnail = '';
       description = 'Video from MovieBox platform';
-    } else if (url.includes('embed') || url.includes('iframe')) {
-      // Generic embed URLs
-      platform = 'Embed';
-      embedUrl = url;
-      videoId = url.split('/').pop() || 'embed-video';
-      title = 'Embedded Video';
+    } else {
+      // Not a MovieBox URL
+      platform = 'Unsupported';
+      embedUrl = '';
+      videoId = '';
+      title = '';
       thumbnail = '';
-      description = 'Embedded video content';
+      description = '';
     }
 
     return { videoId, platform, embedUrl, title, thumbnail, description };
@@ -103,54 +74,18 @@ export default function BulkMovieBoxImport() {
   const fetchVideoMetadata = async (url: string, linkId: string) => {
     const { videoId, platform, title, thumbnail, description } = extractVideoInfo(url);
     
-    // Auto-fill basic info for all platforms
-    updateLink(linkId, 'title', title);
-    updateLink(linkId, 'thumbnailUrl', thumbnail);
-    updateLink(linkId, 'description', description);
-    
-    // Try to fetch better metadata for YouTube
-    if (platform === 'YouTube' && videoId) {
+    // Only process MovieBox URLs
+    if (platform === 'MovieBox') {
+      // Auto-fill basic info
+      updateLink(linkId, 'title', title);
+      updateLink(linkId, 'thumbnailUrl', thumbnail);
+      updateLink(linkId, 'description', description);
+      
+      // Try to extract better title from URL
       try {
-        // Fetch YouTube video metadata using oEmbed
-        const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-        const response = await fetch(oembedUrl);
-        if (response.ok) {
-          const data = await response.json();
-          updateLink(linkId, 'title', data.title || title);
-          updateLink(linkId, 'thumbnailUrl', data.thumbnail_url || thumbnail);
-          updateLink(linkId, 'description', data.author_name || description);
-        }
-      } catch (error) {
-        console.log('Could not fetch YouTube metadata:', error);
-        // Keep the basic info that was already set
-      }
-    }
-    
-    // Try to fetch Dailymotion metadata
-    if (platform === 'Dailymotion' && videoId) {
-      try {
-        // Dailymotion API for video info
-        const apiUrl = `https://www.dailymotion.com/services/video/${videoId}?fields=title,description,thumbnail_url`;
-        const response = await fetch(apiUrl);
-        if (response.ok) {
-          const data = await response.json();
-          updateLink(linkId, 'title', data.title || title);
-          updateLink(linkId, 'thumbnailUrl', data.thumbnail_url || thumbnail);
-          updateLink(linkId, 'description', data.description || description);
-        }
-      } catch (error) {
-        console.log('Could not fetch Dailymotion metadata:', error);
-        // Keep the basic info that was already set
-      }
-    }
-    
-    // Try to fetch MovieBox metadata
-    if (platform === 'MovieBox' && videoId) {
-      try {
-        // For MovieBox, we can try to extract title from URL or use a generic approach
         const urlParts = url.split('/');
         const possibleTitle = urlParts.find(part => part.includes('-') || part.length > 10);
-        if (possibleTitle) {
+        if (possibleTitle && possibleTitle !== 'watch' && possibleTitle !== 'video' && possibleTitle !== 'play' && possibleTitle !== 'embed') {
           const formattedTitle = possibleTitle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           updateLink(linkId, 'title', formattedTitle);
         }
@@ -162,6 +97,11 @@ export default function BulkMovieBoxImport() {
         console.log('Could not fetch MovieBox metadata:', error);
         // Keep the basic info that was already set
       }
+    } else {
+      // Clear fields for unsupported URLs
+      updateLink(linkId, 'title', '');
+      updateLink(linkId, 'thumbnailUrl', '');
+      updateLink(linkId, 'description', '');
     }
   };
 
@@ -220,7 +160,7 @@ export default function BulkMovieBoxImport() {
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <Film className="text-red-600" /> MovieBox Link Import
             </h1>
-            <p className="text-gray-400 mt-1 text-sm">Import movies by simply pasting video links. Supports YouTube, Dailymotion, Vimeo, and direct video links.</p>
+            <p className="text-gray-400 mt-1 text-sm">Import movies by pasting MovieBox video links only. Supports all MovieBox domains and video formats.</p>
           </div>
           <button
             onClick={handleImport}
@@ -297,22 +237,27 @@ export default function BulkMovieBoxImport() {
                             fetchVideoMetadata(e.target.value, link.id);
                           }
                         }}
-                        placeholder="https://youtube.com/watch?v=... or https://dailymotion.com/video/..."
+                        placeholder="https://moviebox.com/watch/video-id or https://movibox.com/embed/video-id"
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                       />
                       {link.url && (
                         <div className="mt-2 flex items-center gap-2">
                           {(() => {
                             const { platform } = extractVideoInfo(link.url);
-                            return platform ? (
+                            return platform === 'MovieBox' ? (
                               <>
                                 <Check className="w-4 h-4 text-green-500" />
-                                <span className="text-xs text-green-500">Detected: {platform}</span>
+                                <span className="text-xs text-green-500">MovieBox URL detected</span>
+                              </>
+                            ) : platform === 'Unsupported' ? (
+                              <>
+                                <AlertCircle className="w-4 h-4 text-red-500" />
+                                <span className="text-xs text-red-500">Only MovieBox URLs are supported</span>
                               </>
                             ) : (
                               <>
                                 <AlertCircle className="w-4 h-4 text-yellow-500" />
-                                <span className="text-xs text-yellow-500">Will use as direct video link</span>
+                                <span className="text-xs text-yellow-500">Invalid URL format</span>
                               </>
                             );
                           })()}

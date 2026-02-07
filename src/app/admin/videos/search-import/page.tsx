@@ -19,6 +19,8 @@ interface MovieBoxMovie {
   video: boolean;
   adult: boolean;
   media_type: string;
+  moviebox_url?: string;
+  video_url?: string;
 }
 
 interface MovieBoxResponse {
@@ -116,7 +118,7 @@ export default function SearchImportPage() {
         title: movie.title || movie.original_title,
         description: movie.overview,
         thumbnailUrl: movie.poster_path || '',
-        movieboxId: movie.id.toString(),
+        movieboxUrl: movie.video_url || movie.moviebox_url || '',
         type: searchType === 'movie' ? 'movie' : searchType === 'anime' ? 'anime' : searchType === 'series' ? 'series' : 'drama',
         section: targetSection,
         hlsUrl: commonHlsUrl.trim() || undefined,
