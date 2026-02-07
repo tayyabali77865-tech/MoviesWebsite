@@ -85,17 +85,43 @@ export default function BulkMovieBoxImport() {
       
       // Try to extract better title from URL
       try {
+        console.log('Extracting title from URL:', url);
         const urlParts = url.split('/');
-        const possibleTitle = urlParts.find(part => part.includes('-') || part.length > 10);
-        if (possibleTitle && possibleTitle !== 'watch' && possibleTitle !== 'video' && possibleTitle !== 'play' && possibleTitle !== 'embed' && possibleTitle !== 'spa') {
-          // For URLs like "jujutsu-kaisen-hindi-Gjrqz0KXx7", extract the movie name part
-          const cleanTitle = possibleTitle.replace(/-[a-zA-Z0-9]{8,}$/, ''); // Remove the ID part at the end
-          const formattedTitle = cleanTitle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          updateLink(linkId, 'title', formattedTitle);
+        console.log('URL parts:', urlParts);
+        
+        // Look for movie title in the URL path
+        let possibleTitle = '';
+        for (const part of urlParts) {
+          if (part.includes('-') && part.length > 10 && part !== 'spa' && part !== 'videoPlayPage' && part !== 'movies') {
+            possibleTitle = part;
+            break;
+          }
         }
-        // Try to generate a thumbnail URL based on common patterns
-        if (videoId && videoId !== 'moviebox-video') {
-          updateLink(linkId, 'thumbnailUrl', `https://img.moviebox.com/thumbnails/${videoId}.jpg`);
+        
+        console.log('Found possible title:', possibleTitle);
+        
+        if (possibleTitle) {
+          // For URLs like "jujutsu-kaisen-hindi-Gjrqz0KXx7", extract the movie name part
+          let cleanTitle = possibleTitle;
+          
+          // Remove ID suffix (alphanumeric part at the end)
+          const idMatch = possibleTitle.match(/-[a-zA-Z0-9]{8,}$/);
+          if (idMatch) {
+            cleanTitle = possibleTitle.replace(idMatch[0], '');
+          }
+          
+          const formattedTitle = cleanTitle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          console.log('Formatted title:', formattedTitle);
+          
+          updateLink(linkId, 'title', formattedTitle);
+          
+          // Try to generate a better thumbnail URL
+          if (videoId && videoId !== 'moviebox-video') {
+            updateLink(linkId, 'thumbnailUrl', `https://img.123movienow.cc/thumbnails/${videoId}.jpg`);
+          }
+          
+          // Add a better description
+          updateLink(linkId, 'description', `${formattedTitle} - Full movie in HD quality on 123movienow.cc`);
         }
       } catch (error) {
         console.log('Could not fetch MovieBox metadata:', error);

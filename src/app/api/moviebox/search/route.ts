@@ -23,11 +23,21 @@ export async function GET(request: NextRequest) {
       console.log('Fetching TMDB:', tmdbUrl);
       const tmdbResponse = await fetch(tmdbUrl);
       console.log('TMDB Response status:', tmdbResponse.status);
+      
       if (tmdbResponse.ok) {
         tmdbMetadata = await tmdbResponse.json();
-        console.log('TMDB Data:', tmdbMetadata);
+        console.log('TMDB Data received:', tmdbMetadata);
+        
+        // Validate that we got real results
+        if (tmdbMetadata.results && tmdbMetadata.results.length > 0) {
+          console.log(`Found ${tmdbMetadata.results.length} real TMDB results`);
+        } else {
+          console.log('TMDB returned no results, using fallback');
+        }
       } else {
         console.log('TMDB failed, status:', tmdbResponse.status);
+        const errorText = await tmdbResponse.text();
+        console.log('TMDB error response:', errorText);
       }
     } catch (error) {
       console.log('TMDB metadata fetch failed, using fallback:', error);
@@ -35,12 +45,13 @@ export async function GET(request: NextRequest) {
 
     // Generate MovieBox results with TMDB metadata or fallback
     const results = generateMovieBoxResults(query, type, parseInt(page), tmdbMetadata);
+    console.log('Final results being sent:', results);
     
     return NextResponse.json({
       results,
       page: parseInt(page),
-      total_pages: 5,
-      total_results: results.length * 5
+      total_pages: tmdbMetadata?.total_pages || 5,
+      total_results: tmdbMetadata?.total_results || results.length * 5
     });
 
   } catch (error) {
@@ -56,8 +67,10 @@ function generateMovieBoxResults(query: string, type: string, page: number, tmdb
   const baseResults = [];
   
   if (tmdbMetadata && tmdbMetadata.results && tmdbMetadata.results.length > 0) {
+    console.log('Using real TMDB data for', tmdbMetadata.results.length, 'results');
     // Use TMDB results as base but convert to MovieBox format
     tmdbMetadata.results.forEach((item: any, index: number) => {
+      console.log(`Processing TMDB item ${index + 1}:`, item.title || item.name);
       baseResults.push({
         id: `mb_${item.id}`,
         title: item.title || item.original_title || item.name,
@@ -77,6 +90,7 @@ function generateMovieBoxResults(query: string, type: string, page: number, tmdb
       });
     });
   } else {
+    console.log('TMDB data not available, using fallback data for query:', query);
     // Fallback results if TMDB fails - always provide data
     for (let i = 1; i <= 5; i++) {
       const id = `mb_${Date.now()}_${i}`;
@@ -101,5 +115,7 @@ function generateMovieBoxResults(query: string, type: string, page: number, tmdb
 
   // Return different results based on page
   const startIndex = (page - 1) * 5;
-  return baseResults.slice(startIndex, startIndex + 5);
+  const paginatedResults = baseResults.slice(startIndex, startIndex + 5);
+  console.log('Returning paginated results:', paginatedResults.length);
+  return paginatedResults;
 }
