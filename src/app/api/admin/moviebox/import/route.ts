@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     let thumbnail = (
       $('meta[property="og:image"]').attr('content') ||
       $('meta[name="twitter:image"]').attr('content') ||
-      null
+      undefined
     );
 
     // Find the first iframe on the page (common pattern for MovieBox embeds)
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       data: {
         title: title || 'Untitled Movie',
         description: description || undefined,
-        thumbnailUrl: thumbnail || undefined,
+        thumbnailUrl: thumbnail || '',
         movieboxUrl: embedUrl,
         type: 'movie',
       },
