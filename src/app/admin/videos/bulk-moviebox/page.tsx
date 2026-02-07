@@ -11,10 +11,11 @@ interface MovieLink {
   title: string;
   url: string;
   thumbnailUrl: string;
+  description: string;
 }
 
 export default function BulkMovieBoxImport() {
-  const [links, setLinks] = useState<MovieLink[]>([{ id: '1', title: '', url: '', thumbnailUrl: '' }]);
+  const [links, setLinks] = useState<MovieLink[]>([{ id: '1', title: '', url: '', thumbnailUrl: '', description: '' }]);
   const [loading, setLoading] = useState(false);
   const [targetSection, setTargetSection] = useState('new');
   const [commonHlsUrl, setCommonHlsUrl] = useState('');
@@ -22,10 +23,10 @@ export default function BulkMovieBoxImport() {
 
   const addLink = () => {
     const newId = (links.length + 1).toString();
-    setLinks([...links, { id: newId, title: '', url: '', thumbnailUrl: '' }]);
+    setLinks([...links, { id: newId, title: '', url: '', thumbnailUrl: '', description: '' }]);
   };
 
-  const updateLink = (id: string, field: 'title' | 'url' | 'thumbnailUrl', value: string) => {
+  const updateLink = (id: string, field: 'title' | 'url' | 'thumbnailUrl' | 'description', value: string) => {
     setLinks(links.map(link => 
       link.id === id ? { ...link, [field]: value } : link
     ));
@@ -42,30 +43,69 @@ export default function BulkMovieBoxImport() {
     let videoId = '';
     let platform = '';
     let embedUrl = '';
+    let title = '';
+    let thumbnail = '';
+    let description = '';
 
     if (url.includes('youtube.com/watch?v=')) {
       videoId = url.split('v=')[1]?.split('&')[0] || '';
       platform = 'YouTube';
       embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      // YouTube oEmbed API for metadata
+      title = `YouTube Video ${videoId}`;
+      thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      description = `Video from YouTube with ID: ${videoId}`;
     } else if (url.includes('youtu.be/')) {
       videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
       platform = 'YouTube';
       embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      title = `YouTube Video ${videoId}`;
+      thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      description = `Video from YouTube with ID: ${videoId}`;
     } else if (url.includes('dailymotion.com/video/')) {
       videoId = url.split('/video/')[1]?.split('?')[0] || '';
       platform = 'Dailymotion';
       embedUrl = `https://www.dailymotion.com/embed/video/${videoId}`;
+      title = `Dailymotion Video ${videoId}`;
+      thumbnail = `https://www.dailymotion.com/thumbnail/video/${videoId}`;
+      description = `Video from Dailymotion with ID: ${videoId}`;
     } else if (url.includes('vimeo.com/')) {
       videoId = url.split('vimeo.com/')[1]?.split('?')[0] || '';
       platform = 'Vimeo';
       embedUrl = `https://player.vimeo.com/video/${videoId}`;
+      title = `Vimeo Video ${videoId}`;
+      thumbnail = `https://vumbnail.com/${videoId}.jpg`;
+      description = `Video from Vimeo with ID: ${videoId}`;
     } else if (url.includes('moviebox') || url.includes('movibox')) {
       // For MovieBox links, we'll use them directly as iframe sources
       platform = 'MovieBox';
       embedUrl = url;
+      title = 'MovieBox Video';
+      thumbnail = '';
+      description = 'Video from MovieBox platform';
     }
 
-    return { videoId, platform, embedUrl };
+    return { videoId, platform, embedUrl, title, thumbnail, description };
+  };
+
+  const fetchVideoMetadata = async (url: string, linkId: string) => {
+    const { videoId, platform } = extractVideoInfo(url);
+    
+    if (platform === 'YouTube' && videoId) {
+      try {
+        // Fetch YouTube video metadata using oEmbed
+        const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+        const response = await fetch(oembedUrl);
+        if (response.ok) {
+          const data = await response.json();
+          updateLink(linkId, 'title', data.title || '');
+          updateLink(linkId, 'thumbnailUrl', data.thumbnail_url || '');
+          updateLink(linkId, 'description', data.author_name || '');
+        }
+      } catch (error) {
+        console.log('Could not fetch YouTube metadata:', error);
+      }
+    }
   };
 
   const handleImport = async () => {
@@ -83,7 +123,7 @@ export default function BulkMovieBoxImport() {
         
         return {
           title: link.title,
-          description: `Imported from ${platform}`,
+          description: link.description || `Imported from ${platform}`,
           thumbnailUrl: link.thumbnailUrl || '',
           // Store the embed URL in a field that can be used by the player
           movieboxUrl: embedUrl,
@@ -187,7 +227,19 @@ export default function BulkMovieBoxImport() {
                       <input
                         type="url"
                         value={link.url}
-                        onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                        onChange={(e) => {
+                          updateLink(link.id, 'url', e.target.value);
+                          // Auto-fill metadata when URL is pasted
+                          if (e.target.value && !link.title) {
+                            fetchVideoMetadata(e.target.value, link.id);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          // Also fetch on blur in case user typed slowly
+                          if (e.target.value && !link.title) {
+                            fetchVideoMetadata(e.target.value, link.id);
+                          }
+                        }}
                         placeholder="https://youtube.com/watch?v=... or https://dailymotion.com/video/..."
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                       />
@@ -219,6 +271,17 @@ export default function BulkMovieBoxImport() {
                         onChange={(e) => updateLink(link.id, 'thumbnailUrl', e.target.value)}
                         placeholder="https://example.com/thumbnail.jpg"
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description (Optional)</label>
+                      <textarea
+                        value={link.description}
+                        onChange={(e) => updateLink(link.id, 'description', e.target.value)}
+                        placeholder="Enter video description..."
+                        rows={3}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
                       />
                     </div>
                   </div>
