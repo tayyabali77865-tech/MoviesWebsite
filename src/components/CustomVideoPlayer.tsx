@@ -18,7 +18,6 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { div } from 'framer-motion/client';
 
 interface Subtitle {
   id: string;
@@ -91,6 +90,7 @@ export function CustomVideoPlayer({
   const [showControls, setShowControls] = useState(true);
   const [currentSeason, setCurrentSeason] = useState(season);
   const [currentEpisode, setCurrentEpisode] = useState(episode);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Detect mobile device for responsive design
   useEffect(() => {
@@ -397,33 +397,13 @@ export function CustomVideoPlayer({
                       <button
                         onClick={onClose}
                         className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm"
+                      >
+                        Close Player
+                      </button>
+                    )}
                   </div>
-                )}
-                <iframe
-                  src={embedUrl}
-                  className="w-full h-full border-0 relative z-[30]"
-                  referrerPolicy="origin"
-                  allowFullScreen
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  onLoad={() => setIframeLoading(false)}
-                />
-              </div>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white z-10">
-                <div className="text-center p-4">
-                  <p className="text-xl font-bold text-red-500 mb-2">No Video Source</p>
-                  <p className="text-gray-400">This video does not have any playable URLs or identifiers.</p>
-                  {onClose && (
-                    <button
-                      onClick={onClose}
-                      className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm"
-                    >
-                      Close Player
-                    </button>
-                  )}
                 </div>
-              </div>
-            )}
+              )}
           </div>
 
           {/* Video Controls - Responsive Design */}
@@ -534,6 +514,7 @@ export function CustomVideoPlayer({
                 </button>
               </div>
             </div>
+            )}
 
             {/* Title Display - Mobile Responsive */}
             <div className={clsx(
